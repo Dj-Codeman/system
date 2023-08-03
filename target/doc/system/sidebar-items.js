@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["create_hash","deldir","ispath","makedir","truncate"]};
