@@ -1,4 +1,4 @@
-use std::str;
+use std::{str, fs::{File, remove_file} };
 use sha2::{Digest, Sha256};
 // use aes::Aes256;
 
@@ -23,7 +23,7 @@ pub fn truncate(s: &str, max_chars: usize) -> &str {
 
 /// Folder manipulation
 
-pub fn ispath(path: &str) -> bool {
+pub fn is_path(path: &str) -> bool {
     if std::path::Path::new(path).exists() { 
         return true;
     } else {
@@ -31,17 +31,23 @@ pub fn ispath(path: &str) -> bool {
     }
 }
 
-pub fn makedir(path: &str) -> Option<bool> {
+pub fn make_dir(path: &str) -> Option<bool> {
     std::fs::create_dir_all(path).unwrap();
-    if ispath(path) { 
-        return Some(true); 
+    return Some(is_path(path));
+}
+
+pub fn make_file(path: &str) -> bool {
+    if is_path(path) {
+        eprintln!("File already exists");
+        return false;
     } else {
-        return Some(false);
+        File::create(path).unwrap();
+        return is_path(path);
     }
 }
 
-pub fn deldir(path: &str) -> Option<bool> {
-    if ispath(path) { // deleting the original one
+pub fn del_dir(path: &str) -> Option<bool> {
+    if is_path(path) { // deleting the original one
         
         std::fs::remove_dir_all(path).unwrap();
         return Some(true);
@@ -51,6 +57,12 @@ pub fn deldir(path: &str) -> Option<bool> {
         return Some(false);
     }
 }
+
+pub fn del_file(path: &str) -> bool {
+    remove_file(path).unwrap();
+    return !is_path(path);
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -72,7 +84,7 @@ mod tests {
 
     #[test]
     fn ispath_test() {
-        let result = ispath("/tmp/definatly_real_path");
+        let result = is_path("/tmp/definatly_real_path");
         assert_eq!(result, false);
     }
 
@@ -83,15 +95,28 @@ mod tests {
     }
 
     #[test]
-    fn create() {
-        let result = makedir(&get_path()).unwrap();
+    fn create_dir() {
+        let result = make_dir(&get_path()).unwrap();
         assert_eq!(result, true);
     }
 
     #[test]
-    fn destroy() {
-        makedir(&get_path());
-        let result = deldir(&get_path()).unwrap();
+    fn destroy_dir() {
+        make_dir(&get_path());
+        let result = del_dir(&get_path()).unwrap();
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    fn create_file() {
+        let result = make_file(&get_path());
+        assert_eq!(result, true);
+    }
+
+    #[test]
+    fn delete_file() {
+        make_file(&get_path());
+        let result = del_file(&get_path());
         assert_eq!(result, true);
     }
 
