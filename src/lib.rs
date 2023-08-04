@@ -76,6 +76,15 @@ mod tests {
         return path;
     }
 
+    fn get_file() -> String {
+        let name = create_hash(&"dummy_test".to_string());
+        let mut path = String::new();
+        path.push_str("/tmp/");
+        path.push_str(&name);
+        path.push_str(".file");
+        return path;
+    }
+
     #[test]
     fn trimming() {
         let result = truncate("Hello, World", 5);
@@ -109,15 +118,16 @@ mod tests {
 
     #[test]
     fn create_file() {
-        let result = make_file(&get_path());
+        let result = make_file(&get_file());
         assert_eq!(result, true);
     }
 
     #[test]
     fn delete_file() {
-        make_file(&get_path());
-        let result = del_file(&get_path());
+        make_file(&get_file());
+        let result = del_file(&get_file());
         assert_eq!(result, true);
     }
 
+    //del_dir(!get_path());
 }
