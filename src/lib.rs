@@ -1,6 +1,5 @@
 use std::{str, fs::{File, remove_file} };
 use sha2::{Digest, Sha256};
-// use aes::Aes256;
 
 
 /// Create 256 bit hash
