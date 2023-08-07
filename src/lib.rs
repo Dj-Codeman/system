@@ -1,4 +1,4 @@
-use std::{str, fs::{File, remove_file} };
+use std::{str, fs::{File, remove_file, self}, os::unix::prelude::PermissionsExt };
 use sha2::{Digest, Sha256};
 
 
@@ -21,6 +21,16 @@ pub fn truncate(s: &str, max_chars: usize) -> &str {
 }
 
 /// Folder manipulation
+pub fn make_dir_perm(folder_name: &str, permissions: u32) -> Result<(), String> {
+    let permissions = fs::Permissions::from_mode(permissions);
+
+    fs::create_dir(folder_name)
+        .map_err(|err| format!("Error creating folder: {}", err))
+        .and_then(|()| {
+            fs::set_permissions(folder_name, permissions)
+                .map_err(|err| format!("Error setting permissions: {}", err))
+        })
+}
 
 pub fn is_path(path: &str) -> bool {
     if std::path::Path::new(path).exists() { 
