@@ -1,6 +1,23 @@
-use std::{str, fs::{File, remove_file, self}, os::unix::prelude::PermissionsExt };
+use std::{str, fs::{File, remove_file, self}, os::unix::prelude::PermissionsExt};
 use sha2::{Digest, Sha256};
+use std::io::{BufRead, BufReader};
 
+/// Checking if file contains string
+pub fn is_string_in_file(file_path: &str, target_string: &str) -> bool {
+    let file = File::open(file_path).unwrap();
+    let reader = BufReader::new(file);
+
+    for line in reader.lines() {
+        let line = line.unwrap(); // Panics if there's an error reading a line
+
+        // Check if the current line is equal to the target string
+        if line.trim() == target_string {
+            return true; // Found a match
+        }
+    }
+
+    false // Target string not found in the file
+}
 
 /// Create 256 bit hash
 pub fn create_hash(data: &String) -> String {
