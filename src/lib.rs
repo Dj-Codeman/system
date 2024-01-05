@@ -1,3 +1,4 @@
+use zip::ZipArchive;
 use std::{str, fs::{File, remove_file, self}, os::unix::prelude::PermissionsExt};
 use sha2::{Digest, Sha256};
 use std::io::{BufRead, BufReader};
@@ -87,6 +88,29 @@ pub fn del_dir(path: &str) -> Option<bool> {
 pub fn del_file(path: &str) -> bool {
     remove_file(path).unwrap();
     return !is_path(path);
+}
+
+pub fn unzip_folder(zip_path: &str, output_folder: &str) -> Result<(), Box<dyn std::error::Error>> {
+    // Open the zip file
+    let file = File::open(zip_path)?;
+    let mut archive = ZipArchive::new(file)?;
+
+    // Create the output folder if it doesn't exist
+    std::fs::create_dir_all(output_folder)?;
+
+    // Iterate over each file in the zip archive
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i)?;
+
+        // Extract file information
+        let file_path = format!("{}/{}", output_folder, file.sanitized_name().to_string_lossy());
+        let mut output_file = File::create(&file_path)?;
+
+        // Copy the file content to the output file
+        std::io::copy(&mut file, &mut output_file)?;
+    }
+
+    Ok(())
 }
 
 
