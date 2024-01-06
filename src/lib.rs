@@ -1,4 +1,5 @@
 use sha2::{Digest, Sha256};
+use std::fs::create_dir_all;
 use std::io::{BufRead, BufReader};
 use std::{
     fs::{self, remove_file, File},
@@ -128,7 +129,7 @@ pub fn unzip_folder(zip_path: &str, output_folder: &str) -> Result<bool, String>
                     // Iterate over each file in the zip archive
                     for i in 0..archive.len() {
 
-                        let mut file = match archive.by_index(i){
+                        let mut file: zip::read::ZipFile<'_> = match archive.by_index(i){
                             Ok(file_index) => file_index,
                             Err(_) => return Err("An error occoured while reading the zip, Possible corruption ?".to_string()),
                         };
@@ -139,6 +140,14 @@ pub fn unzip_folder(zip_path: &str, output_folder: &str) -> Result<bool, String>
                             output_folder,
                             file.mangled_name().to_string_lossy()
                         );
+
+                        // Ensuring some paths exist before writing data
+                        if let Some(parent_dir) = std::path::Path::new(&file_path).parent() {
+                            match create_dir_all(parent_dir) {
+                                Ok(_) => (),
+                                Err(e) => return Err(format!("Failed to create the parent directory:\n{}", e)),
+                            }
+                        };
 
                         let mut output_file: File = match File::create(&file_path) {
                             Ok(file) => file,
