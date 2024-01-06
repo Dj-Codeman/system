@@ -1,7 +1,11 @@
-use zip::ZipArchive;
-use std::{str, fs::{File, remove_file, self}, os::unix::prelude::PermissionsExt};
 use sha2::{Digest, Sha256};
 use std::io::{BufRead, BufReader};
+use std::{
+    fs::{self, remove_file, File},
+    os::unix::prelude::PermissionsExt,
+    str,
+};
+use zip::ZipArchive;
 
 /// Checking if file contains string
 pub fn is_string_in_file(file_path: &str, target_string: &str) -> bool {
@@ -26,7 +30,7 @@ pub fn create_hash(data: &String) -> String {
     hasher.update(data);
     let result = hasher.finalize();
     let hash: String = hex::encode(result);
-    return hash
+    return hash;
     // 256 because its responsible for generating the writing keys
 }
 
@@ -51,7 +55,7 @@ pub fn make_dir_perm(folder_name: &str, permissions: u32) -> Result<(), String> 
 }
 
 pub fn is_path(path: &str) -> bool {
-    if std::path::Path::new(path).exists() { 
+    if std::path::Path::new(path).exists() {
         return true;
     } else {
         return false;
@@ -59,8 +63,14 @@ pub fn is_path(path: &str) -> bool {
 }
 
 pub fn make_dir(path: &str) -> Option<bool> {
-    std::fs::create_dir_all(path).unwrap();
-    return Some(is_path(path));
+    if is_path(path) {
+        return Some(true);
+    } else {
+        match std::fs::create_dir_all(path) {
+            Ok(_) => return Some(true),
+            Err(_) => return Some(false),
+        }
+    }
 }
 
 pub fn make_file(path: &str) -> bool {
@@ -74,11 +84,11 @@ pub fn make_file(path: &str) -> bool {
 }
 
 pub fn del_dir(path: &str) -> Option<bool> {
-    if is_path(path) { // deleting the original one
-        
+    if is_path(path) {
+        // deleting the original one
+
         std::fs::remove_dir_all(path).unwrap();
         return Some(true);
-
     } else {
         eprintln!("File cannot be erased if it doesn't exist");
         return Some(false);
@@ -90,29 +100,67 @@ pub fn del_file(path: &str) -> bool {
     return !is_path(path);
 }
 
-pub fn unzip_folder(zip_path: &str, output_folder: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn unzip_folder(zip_path: &str, output_folder: &str) -> Result<bool, String> {
     // Open the zip file
-    let file = File::open(zip_path)?;
-    let mut archive = ZipArchive::new(file)?;
+    let file: Option<File> = match is_path(zip_path) {
+        true => match File::open(zip_path) {
+            Ok(f) => Some(f),
+            Err(e) => {
+                let message: String = format!("Unzipping failed: {}", e);
+                return Err(message);
+            }
+        },
+        false => None,
+    };
 
-    // Create the output folder if it doesn't exist
-    std::fs::create_dir_all(output_folder)?;
+    match file {
+        Some(file) => {
+            let mut archive = match ZipArchive::new(file) {
+                Ok(d) => d,
+                Err(_) => {
+                    return Err("An error was encountered while reading the archive".to_string())
+                }
+            };
 
-    // Iterate over each file in the zip archive
-    for i in 0..archive.len() {
-        let mut file = archive.by_index(i)?;
+            // Create the output folder if it doesn't exist
+            match make_dir(output_folder) {
+                Some(_) => {
+                    // Iterate over each file in the zip archive
+                    for i in 0..archive.len() {
 
-        // Extract file information
-        let file_path = format!("{}/{}", output_folder, file.sanitized_name().to_string_lossy());
-        let mut output_file = File::create(&file_path)?;
+                        let mut file = match archive.by_index(i){
+                            Ok(file_index) => file_index,
+                            Err(_) => return Err("An error occoured while reading the zip, Possible corruption ?".to_string()),
+                        };
 
-        // Copy the file content to the output file
-        std::io::copy(&mut file, &mut output_file)?;
+                        // Extract file information
+                        let file_path: String = format!(
+                            "{}/{}",
+                            output_folder,
+                            file.mangled_name().to_string_lossy()
+                        );
+
+                        let mut output_file: File = match File::create(&file_path) {
+                            Ok(file) => file,
+                            Err(e) => return Err(format!("An error occoured while reading files in archive:\n{}", e)),
+                        };
+
+                        // Copy the file content to the output file
+                        match std::io::copy(&mut file, &mut output_file) {
+                            Ok(_) => print!("{}", &file_path),
+                            Err(e) => return Err(format!("An error occoured while writing file to directory:\n{}", e)),
+                        }
+                    }
+                    return Ok(true)
+                }
+                None => return Err("Failed to create the destination directory".to_string()),
+            }
+        }
+        None => {
+            return Err("Zip path provided was not vailid".to_string());
+        }
     }
-
-    Ok(())
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -150,7 +198,10 @@ mod tests {
     #[test]
     fn hash() {
         let result = create_hash(&"hash".to_string());
-        assert_eq!(result, "d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa".to_string());
+        assert_eq!(
+            result,
+            "d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa".to_string()
+        );
     }
 
     #[test]
