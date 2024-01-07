@@ -111,34 +111,10 @@ pub fn untar(file_path: &str, output_folder: &str) -> Result<(), String> {
     let tar = GzDecoder::new(tar_reader);
     let mut archive = Archive::new(tar);
 
-    match make_dir(output_folder) {
-        Some(_) => {
-            for entry in archive
-                .entries()
-                .map_err(|e| format!("Error reading tarball: {}", e))?
-            {
-                let mut entry = entry.map_err(|e| format!("Error processing tar entry: {}", e))?;
-
-                let path = entry
-                    .path()
-                    .map_err(|e| format!("Error getting entry path: {}", e))?;
-                let path_str = path.to_string_lossy();
-
-                if let Some(parent) = path.parent() {
-                    std::fs::create_dir_all(parent)
-                        .map_err(|e| format!("Error creating directory: {}", e))?;
-                }
-                let mut file = std::fs::File::create(&*path_str)
-                    .map_err(|e| format!("Error creating file: {}", e))?;
-
-                std::io::copy(&mut entry, &mut file)
-                    .map_err(|e| format!("Error copying entry contents: {}", e))?;
-            }
-
-        }
-        None => return Err("Could not create folder to extract to".to_string()),
+    match archive.unpack(output_folder) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e.to_string()),
     }
-    Ok(())
 }
 
 #[cfg(test)]
