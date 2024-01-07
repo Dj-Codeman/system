@@ -1,12 +1,12 @@
+use flate2::bufread::GzDecoder;
 use sha2::{Digest, Sha256};
-use std::fs::create_dir_all;
 use std::io::{BufRead, BufReader};
 use std::{
     fs::{self, remove_file, File},
     os::unix::prelude::PermissionsExt,
     str,
 };
-use zip::ZipArchive;
+use tar::Archive;
 
 /// Checking if file contains string
 pub fn is_string_in_file(file_path: &str, target_string: &str) -> bool {
@@ -101,74 +101,44 @@ pub fn del_file(path: &str) -> bool {
     return !is_path(path);
 }
 
-pub fn unzip_folder(zip_path: &str, output_folder: &str) -> Result<bool, String> {
-    // Open the zip file
-    let file: Option<File> = match is_path(zip_path) {
-        true => match File::open(zip_path) {
-            Ok(f) => Some(f),
-            Err(e) => {
-                let message: String = format!("Unzipping failed: {}", e);
-                return Err(message);
-            }
-        },
-        false => None,
+pub fn untar(file_path: &str, output_folder: &str) -> Result<(), String> {
+    let tar_file: File = match File::open(file_path) {
+        Ok(f) => f,
+        Err(e) => return Err(format!("The tar file given could not be opened:\n{}", e)),
     };
 
-    match file {
-        Some(file) => {
-            let mut archive = match ZipArchive::new(file) {
-                Ok(d) => d,
-                Err(_) => {
-                    return Err("An error was encountered while reading the archive".to_string())
+    let tar_reader = BufReader::new(tar_file);
+    let tar = GzDecoder::new(tar_reader);
+    let mut archive = Archive::new(tar);
+
+    match make_dir(output_folder) {
+        Some(_) => {
+            for entry in archive
+                .entries()
+                .map_err(|e| format!("Error reading tarball: {}", e))?
+            {
+                let mut entry = entry.map_err(|e| format!("Error processing tar entry: {}", e))?;
+
+                let path = entry
+                    .path()
+                    .map_err(|e| format!("Error getting entry path: {}", e))?;
+                let path_str = path.to_string_lossy();
+
+                if let Some(parent) = path.parent() {
+                    std::fs::create_dir_all(parent)
+                        .map_err(|e| format!("Error creating directory: {}", e))?;
                 }
-            };
+                let mut file = std::fs::File::create(&*path_str)
+                    .map_err(|e| format!("Error creating file: {}", e))?;
 
-            // Create the output folder if it doesn't exist
-            match make_dir(output_folder) {
-                Some(_) => {
-                    // Iterate over each file in the zip archive
-                    for i in 0..archive.len() {
-
-                        let mut file: zip::read::ZipFile<'_> = match archive.by_index(i){
-                            Ok(file_index) => file_index,
-                            Err(_) => return Err("An error occoured while reading the zip, Possible corruption ?".to_string()),
-                        };
-
-                        // Extract file information
-                        let file_path: String = format!(
-                            "{}/{}",
-                            output_folder,
-                            file.mangled_name().to_string_lossy()
-                        );
-
-                        // Ensuring some paths exist before writing data
-                        if let Some(parent_dir) = std::path::Path::new(&file_path).parent() {
-                            match create_dir_all(parent_dir) {
-                                Ok(_) => (),
-                                Err(e) => return Err(format!("Failed to create the parent directory:\n{}", e)),
-                            }
-                        };
-
-                        let mut output_file: File = match File::create(&file_path) {
-                            Ok(file) => file,
-                            Err(e) => return Err(format!("An error occoured while reading files in archive:\n{}", e)),
-                        };
-
-                        // Copy the file content to the output file
-                        match std::io::copy(&mut file, &mut output_file) {
-                            Ok(_) => print!("{}", &file_path),
-                            Err(e) => return Err(format!("An error occoured while writing file to directory:\n{}", e)),
-                        }
-                    }
-                    return Ok(true)
-                }
-                None => return Err("Failed to create the destination directory".to_string()),
+                std::io::copy(&mut entry, &mut file)
+                    .map_err(|e| format!("Error copying entry contents: {}", e))?;
             }
+
         }
-        None => {
-            return Err("Zip path provided was not vailid".to_string());
-        }
+        None => return Err("Could not create folder to extract to".to_string()),
     }
+    Ok(())
 }
 
 #[cfg(test)]
