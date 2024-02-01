@@ -1,28 +1,43 @@
+pub mod errors;
+
+use errors::SystemError;
 use flate2::bufread::GzDecoder;
 use sha2::{Digest, Sha256};
+use tar::Archive;
 use std::io::{BufRead, BufReader};
 use std::{
     fs::{self, remove_file, File},
     os::unix::prelude::PermissionsExt,
     str,
 };
-use tar::Archive;
 
 /// Checking if file contains string
-pub fn is_string_in_file(file_path: &str, target_string: &str) -> bool {
-    let file = File::open(file_path).unwrap();
+pub fn is_string_in_file(file_path: &str, target_string: &str) -> Result<bool, SystemError> {
+    let file = match File::open(file_path) {
+        Ok(d) => d,
+        Err(e) => {
+            let data = e.to_string();
+            return Err(SystemError::new_details(
+                errors::SystemErrorType::ErrorOpeningFile,
+                &data,
+            ));
+        }
+    };
     let reader = BufReader::new(file);
 
     for line in reader.lines() {
-        let line = line.unwrap(); // Panics if there's an error reading a line
+        let line = match line {
+            Ok(d) => d,
+            Err(_) => return Err(SystemError::new(errors::SystemErrorType::ErrorReadingFile)),
+        }; // Panics if there's an error reading a line
 
         // Check if the current line is equal to the target string
         if line.trim() == target_string {
-            return true; // Found a match
+            return Ok(true); // Found a match
         }
     }
 
-    false // Target string not found in the file
+    Ok(false) // Target string not found in the file
 }
 
 /// Create 256 bit hash
@@ -44,14 +59,23 @@ pub fn truncate(s: &str, max_chars: usize) -> &str {
 }
 
 /// Folder manipulation
-pub fn make_dir_perm(folder_name: &str, permissions: u32) -> Result<(), String> {
+pub fn make_dir_perm(folder_name: &str, permissions: u32) -> Result<(), SystemError> {
     let permissions = fs::Permissions::from_mode(permissions);
 
     fs::create_dir(folder_name)
-        .map_err(|err| format!("Error creating folder: {}", err))
+        .map_err(|err| {
+            SystemError::new_details(
+                errors::SystemErrorType::ErrorCreatingDir,
+                &format!("Error creating folder: {}", err),
+            )
+        })
         .and_then(|()| {
-            fs::set_permissions(folder_name, permissions)
-                .map_err(|err| format!("Error setting permissions: {}", err))
+            fs::set_permissions(folder_name, permissions).map_err(|err| {
+                SystemError::new_details(
+                    errors::SystemErrorType::ErrorSettingPermDir,
+                    &format!("Error setting permissions: {}", err),
+                )
+            })
         })
 }
 
@@ -63,48 +87,78 @@ pub fn is_path(path: &str) -> bool {
     }
 }
 
-pub fn make_dir(path: &str) -> Option<bool> {
+pub fn make_dir(path: &str) -> Result<bool, SystemError> {
     if is_path(path) {
-        return Some(true);
+        return Ok(true);
     } else {
         match std::fs::create_dir_all(path) {
-            Ok(_) => return Some(true),
-            Err(_) => return Some(false),
+            Ok(_) => return Ok(true),
+            Err(_) => return Err(SystemError::new(errors::SystemErrorType::ErrorCreatingDir)),
         }
     }
 }
 
-pub fn make_file(path: &str) -> bool {
-    if is_path(path) {
-        eprintln!("File already exists");
-        return false;
-    } else {
-        File::create(path).unwrap();
-        return is_path(path);
+pub fn remake_dir(path: &str) -> Result<(), SystemError> {
+    match del_dir(path) {
+        Ok(_) => match make_dir(path) {
+            Ok(_) => return Ok(()),
+            Err(e) => return Err(e),
+        },
+        Err(e) => return Err(e),
     }
 }
 
-pub fn del_dir(path: &str) -> Option<bool> {
-    if is_path(path) {
-        // deleting the original one
-
-        std::fs::remove_dir_all(path).unwrap();
-        return Some(true);
-    } else {
-        eprintln!("File cannot be erased if it doesn't exist");
-        return Some(false);
+pub fn make_file(path: &str) -> Result<bool, SystemError> {
+    match is_path(path) {
+        true => return Ok(false), // This will fail since we did not create a new file
+        false => match File::create(path) {
+            Ok(_) => return Ok(true),
+            Err(e) => {
+                return Err(SystemError::new_details(
+                    errors::SystemErrorType::ErrorCreatingFile,
+                    &e.to_string(),
+                ))
+            }
+        },
     }
 }
 
-pub fn del_file(path: &str) -> bool {
-    remove_file(path).unwrap();
-    return !is_path(path);
+pub fn del_dir(path: &str) -> Result<bool, SystemError> {
+    match is_path(path) {
+        true => match std::fs::remove_dir_all(path) {
+            Ok(_) => return Ok(true),
+            Err(e) => {
+                return Err(SystemError::new_details(
+                    errors::SystemErrorType::ErrorDeletingDir,
+                    &e.to_string(),
+                ))
+            }
+        },
+        false => return Ok(true), // Maybe throw a warning ??
+    }
 }
 
-pub fn untar(file_path: &str, output_folder: &str) -> Result<(), String> {
+pub fn del_file(path: &str) -> Result<(), SystemError> {
+    match remove_file(path) {
+        Ok(_) => return Ok(()),
+        Err(e) => {
+            return Err(SystemError::new_details(
+                errors::SystemErrorType::ErrorDeletingFile,
+                &e.to_string(),
+            ))
+        }
+    }
+}
+
+pub fn untar(file_path: &str, output_folder: &str) -> Result<(), SystemError> {
     let tar_file: File = match File::open(file_path) {
         Ok(f) => f,
-        Err(e) => return Err(format!("The tar file given could not be opened:\n{}", e)),
+        Err(e) => {
+            return Err(SystemError::new_details(
+                errors::SystemErrorType::ErrorOpeningFile,
+                &e.to_string(),
+            ))
+        }
     };
 
     let tar_reader = BufReader::new(tar_file);
@@ -113,7 +167,10 @@ pub fn untar(file_path: &str, output_folder: &str) -> Result<(), String> {
 
     match archive.unpack(output_folder) {
         Ok(_) => Ok(()),
-        Err(e) => Err(e.to_string()),
+        Err(e) => return Err(SystemError::new_details(
+            errors::SystemErrorType::ErrorUntaringFile,
+            &e.to_string(),
+        )),
     }
 }
 
@@ -167,7 +224,7 @@ mod tests {
 
     #[test]
     fn destroy_dir() {
-        make_dir(&get_path());
+        let _ = make_dir(&get_path());
         let result = del_dir(&get_path()).unwrap();
         assert_eq!(result, true);
     }
@@ -175,15 +232,14 @@ mod tests {
     #[test]
     fn create_file() {
         let result = make_file(&get_file());
-        assert_eq!(result, true);
+        assert_eq!(result.unwrap(), true);
     }
 
     #[test]
     fn delete_file() {
-        make_file(&get_file());
-        let result = del_file(&get_file());
-        assert_eq!(result, true);
+        let _ = make_file(&get_file());
+        let _ = del_file(&get_file());
+        assert_eq!(is_path(&get_file()), false);
     }
 
-    //del_dir(!get_path());
 }
