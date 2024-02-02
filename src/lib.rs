@@ -41,7 +41,7 @@ pub fn is_string_in_file(file_path: &str, target_string: &str) -> Result<bool, S
 }
 
 /// Create 256 bit hash
-pub fn create_hash(data: &String) -> String {
+pub fn create_hash(data: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(data);
     let result = hasher.finalize();
