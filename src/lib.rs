@@ -41,7 +41,7 @@ pub fn is_string_in_file(file_path: &str, target_string: &str) -> Result<bool, S
 }
 
 /// Create 256 bit hash
-pub fn create_hash(data: &str) -> String {
+pub fn create_hash(data: String) -> String {
     let mut hasher = Sha256::new();
     hasher.update(data);
     let result = hasher.finalize();
@@ -179,7 +179,7 @@ mod tests {
     use super::*;
 
     fn get_path() -> String {
-        let name = create_hash(&"dummy_test".to_string());
+        let name = create_hash("dummy_test".to_string());
         let mut path = String::new();
         path.push_str("/tmp/");
         path.push_str(&name);
@@ -187,7 +187,7 @@ mod tests {
     }
 
     fn get_file() -> String {
-        let name = create_hash(&"dummy_test".to_string());
+        let name = create_hash("dummy_test".to_string());
         let mut path = String::new();
         path.push_str("/tmp/");
         path.push_str(&name);
@@ -209,7 +209,7 @@ mod tests {
 
     #[test]
     fn hash() {
-        let result = create_hash(&"hash".to_string());
+        let result = create_hash("hash".to_string());
         assert_eq!(
             result,
             "d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa".to_string()
