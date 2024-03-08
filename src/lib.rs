@@ -142,7 +142,7 @@ pub fn del_dir(path: &str) -> Result<bool, SystemError> {
     match path_present(PathBuf::from(path)) {
         Ok(d) => match d {
             true => match std::fs::remove_dir_all(path) {
-                Ok(_) => todo!(),
+                Ok(_) => return Ok(true),
                 Err(e) => return Err(SystemError::new_details(
                     errors::SystemErrorType::ErrorDeletingDir,
                     &e.to_string(),
