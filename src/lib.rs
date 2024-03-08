@@ -5,6 +5,7 @@ use flate2::bufread::GzDecoder;
 use sha2::{Digest, Sha256};
 use tar::Archive;
 use std::io::{BufRead, BufReader};
+use std::path::PathBuf;
 use std::{
     fs::{self, remove_file, File},
     os::unix::prelude::PermissionsExt,
@@ -79,6 +80,7 @@ pub fn make_dir_perm(folder_name: &str, permissions: u32) -> Result<(), SystemEr
         })
 }
 
+#[deprecated(since="0.1.0", note="please use `path_present` instead")]
 pub fn is_path(path: &str) -> bool {
     if std::path::Path::new(path).exists() {
         return true;
@@ -87,14 +89,23 @@ pub fn is_path(path: &str) -> bool {
     }
 }
 
+pub fn path_present(path: PathBuf) -> Result<bool, SystemError> {
+    match path.try_exists() {
+        Ok(d) => return Ok(d),
+        Err(e) => return Err(SystemError::new_details(errors::SystemErrorType::ErrorReadingFile, &e.to_string())),
+    }
+}
+
 pub fn make_dir(path: &str) -> Result<bool, SystemError> {
-    if is_path(path) {
-        return Ok(true);
-    } else {
-        match std::fs::create_dir_all(path) {
-            Ok(_) => return Ok(true),
-            Err(_) => return Err(SystemError::new(errors::SystemErrorType::ErrorCreatingDir)),
-        }
+    match path_present(PathBuf::from(path)) {
+        Ok(d) => match d {
+            true => return Ok(true),
+            false => match std::fs::create_dir_all(path){
+                Ok(_) => return Ok(true),
+                Err(e) => return Err(SystemError::new_details(errors::SystemErrorType::ErrorCreatingDir, &e.to_string())),
+            },
+        },
+        Err(e) => return Err(SystemError::new_details(errors::SystemErrorType::ErrorCreatingDir, &e.to_string())),
     }
 }
 
@@ -109,32 +120,40 @@ pub fn remake_dir(path: &str) -> Result<(), SystemError> {
 }
 
 pub fn make_file(path: &str) -> Result<bool, SystemError> {
-    match is_path(path) {
-        true => return Ok(false), // This will fail since we did not create a new file
-        false => match File::create(path) {
-            Ok(_) => return Ok(true),
-            Err(e) => {
-                return Err(SystemError::new_details(
+    match path_present(PathBuf::from(path)) {
+        Ok(d) => match d {
+            true => return Ok(false), // This will fail since we did not create a new file
+            false => match File::create(path) {
+                Ok(_) => return Ok(true),
+                Err(e) => return Err(SystemError::new_details(
                     errors::SystemErrorType::ErrorCreatingFile,
                     &e.to_string(),
-                ))
-            }
+                )),
+            },
         },
+        Err(e) => return Err(SystemError::new_details(
+            errors::SystemErrorType::ErrorCreatingFile,
+            &e.to_string(),
+        )),
     }
 }
 
 pub fn del_dir(path: &str) -> Result<bool, SystemError> {
-    match is_path(path) {
-        true => match std::fs::remove_dir_all(path) {
-            Ok(_) => return Ok(true),
-            Err(e) => {
-                return Err(SystemError::new_details(
+    match path_present(PathBuf::from(path)) {
+        Ok(d) => match d {
+            true => match std::fs::remove_dir_all(path) {
+                Ok(_) => todo!(),
+                Err(e) => return Err(SystemError::new_details(
                     errors::SystemErrorType::ErrorDeletingDir,
                     &e.to_string(),
-                ))
-            }
+                )),
+            },
+            false => return Ok(true),
         },
-        false => return Ok(true), // Maybe throw a warning ??
+        Err(e) => return Err(SystemError::new_details(
+            errors::SystemErrorType::ErrorDeletingDir,
+            &e.to_string(),
+        )),
     }
 }
 
