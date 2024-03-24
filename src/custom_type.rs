@@ -78,6 +78,7 @@ impl Deref for PathType {
         }
     }
 }
+
 impl<T> AsRef<T> for PathType
 where
     T: ?Sized,

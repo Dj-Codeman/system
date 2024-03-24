@@ -1,8 +1,8 @@
 pub mod custom_type;
 pub mod errors;
 
-pub use custom_type::{CopyPath, PathType};
-use errors::SystemError;
+pub use custom_type::{CopyPath, PathType, ClonePath};
+pub use errors::SystemError;
 use flate2::bufread::GzDecoder;
 use sha2::{Digest, Sha256};
 use std::io::{BufRead, BufReader};
