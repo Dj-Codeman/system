@@ -1,12 +1,12 @@
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct SystemError {
     pub kind: SystemErrorType,
     pub details: Option<String>
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum SystemErrorType {
     ErrorOpeningFile,
     ErrorReadingFile,
