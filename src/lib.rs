@@ -1,7 +1,7 @@
 pub mod custom_type;
 pub mod errors;
 
-use custom_type::{CopyPath, PathType};
+pub use custom_type::{CopyPath, PathType};
 use errors::SystemError;
 use flate2::bufread::GzDecoder;
 use sha2::{Digest, Sha256};
