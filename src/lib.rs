@@ -158,14 +158,15 @@ pub fn del_dir(path: &str) -> Result<bool, SystemError> {
 }
 
 pub fn del_file(path: &str) -> Result<(), SystemError> {
-    match remove_file(path) {
-        Ok(_) => return Ok(()),
-        Err(e) => {
-            return Err(SystemError::new_details(
-                errors::SystemErrorType::ErrorDeletingFile,
-                &e.to_string(),
-            ))
-        }
+    match path_present(PathBuf::from(path)) {
+        Ok(b) => match b {
+            true => match remove_file(path) {
+                Ok(_) => return Ok(()),
+                Err(e) => return Err(SystemError::new_details(errors::SystemErrorType::ErrorDeletingFile, &e.to_string())),
+            },
+            false => return Ok(()), // If the file never existed in the first place 
+        },
+        Err(e) => return Err(e),
     }
 }
 
