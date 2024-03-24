@@ -1,4 +1,4 @@
-mod custom_type;
+pub mod custom_type;
 pub mod errors;
 
 use custom_type::{CopyPath, PathType};
