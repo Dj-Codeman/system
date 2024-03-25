@@ -2,6 +2,8 @@ use std::{
     fmt, ops::Deref, path::{Path, PathBuf}
 };
 
+use serde::{Deserialize, Serialize};
+
 /// Represents different types of paths.
 ///
 /// This enum can hold different types of paths:
@@ -10,7 +12,7 @@ use std::{
 /// - `Path`: Represents a borrowed path.
 /// - `str`: Represents a borrowed string path.
 /// - `Content`: Represents a path as a string content.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum PathType {
     PathBuf(PathBuf),
     Path(Box<Path>),
