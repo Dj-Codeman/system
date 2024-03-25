@@ -1,6 +1,5 @@
 use std::{
-    ops::Deref,
-    path::{Path, PathBuf},
+    fmt, ops::Deref, path::{Path, PathBuf}
 };
 
 /// Represents different types of paths.
@@ -62,6 +61,17 @@ impl PathType {
             PathType::Path(path) => path.as_ref().to_path_buf(),
             PathType::Str(str_box) => PathBuf::from(&**str_box),
             PathType::Content(content) => PathBuf::from(content),
+        }
+    }
+}
+
+impl fmt::Display for PathType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            PathType::PathBuf(path_buf) => write!(f, "{}", path_buf.display()),
+            PathType::Path(path) => write!(f, "{}", path.display()),
+            PathType::Str(str_box) => write!(f, "{}", str_box),
+            PathType::Content(content) => write!(f, "{}", content),
         }
     }
 }
