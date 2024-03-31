@@ -5,13 +5,32 @@ pub use custom_type::{CopyPath, PathType, ClonePath};
 pub use errors::SystemError;
 use flate2::bufread::GzDecoder;
 use sha2::{Digest, Sha256};
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, Read};
 use std::{
     fs::{self, remove_file, File},
     os::unix::prelude::PermissionsExt,
     str,
 };
 use tar::Archive;
+/// Generates a random string of the specified length using alphanumeric characters.
+///
+/// # Arguments
+///
+/// * `length` - The length of the random string to generate.
+///
+/// # Returns
+///
+/// A random string of the specified length.
+///
+pub fn generate_random_string(length: usize) -> Result<String, std::io::Error> {
+    let mut file = File::open("/dev/urandom")?;
+    let mut buffer = vec![0; length];
+    file.read_exact(&mut buffer)?;
+    Ok(buffer
+        .iter()
+        .map(|&x| (x % 26 + 97) as u8 as char)
+        .collect::<String>())
+}
 
 /// Checking if file contains a specific string.
 ///
@@ -356,7 +375,7 @@ pub fn untar(file_path: &PathType, output_folder: &str) -> Result<(), SystemErro
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
-
+    use super::generate_random_string;
     use super::*;
 
     fn get_path() -> PathType {
@@ -374,6 +393,13 @@ mod tests {
         path.push_str(&name);
         path.push_str(".file");
         return PathType::Content(path);
+    }
+
+    #[test]
+    fn random_string() {
+        let test_string: String = generate_random_string(10).unwrap();
+        assert_eq!(test_string.len(), 10);
+
     }
 
     #[test]
