@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 /// - `Path`: Represents a borrowed path.
 /// - `str`: Represents a borrowed string path.
 /// - `Content`: Represents a path as a string content.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PathType {
     PathBuf(PathBuf),
     Path(Box<Path>),
