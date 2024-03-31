@@ -12,6 +12,7 @@ use std::{
     str,
 };
 use tar::Archive;
+
 /// Generates a random string of the specified length using alphanumeric characters.
 ///
 /// # Arguments
@@ -21,7 +22,6 @@ use tar::Archive;
 /// # Returns
 ///
 /// A random string of the specified length.
-///
 pub fn generate_random_string(length: usize) -> Result<String, std::io::Error> {
     let mut file = File::open("/dev/urandom")?;
     let mut buffer = vec![0; length];
