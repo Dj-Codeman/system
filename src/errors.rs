@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, io};
 
 #[derive(Debug, PartialEq)]
 pub struct SystemError {
@@ -17,6 +17,7 @@ pub enum SystemErrorType {
     ErrorSettingPermDir,
     ErrorSettingPermFile,
     ErrorUntaringFile,
+    ErrorInputOutput,
 }
 
 // pretty display
@@ -55,6 +56,22 @@ impl SystemError {
             SystemErrorType::ErrorSettingPermDir => String::from("An error occoured while setting folder permissions"),
             SystemErrorType::ErrorSettingPermFile => String::from("An error occoured while setting file permissions"),
             SystemErrorType::ErrorUntaringFile => String::from("An error was encountered while reading a tar file"),
+            SystemErrorType::ErrorInputOutput => String::from("An IO error has occoured"),
         }
+    }
+}
+
+
+// CONVERSIONS FOR ERRORS 
+
+impl From<io::Error> for SystemError {
+    fn from(err: io::Error) -> Self {
+        SystemError::new_details(SystemErrorType::ErrorInputOutput, &err.to_string())
+    }
+}
+
+impl From<walkdir::Error> for SystemError {
+    fn from(err: walkdir::Error) -> Self {
+        SystemError::new_details(SystemErrorType::ErrorInputOutput, &err.to_string())
     }
 }

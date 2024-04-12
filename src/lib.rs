@@ -5,7 +5,9 @@ pub use custom_type::{CopyPath, PathType, ClonePath};
 pub use errors::SystemError;
 use flate2::bufread::GzDecoder;
 use sha2::{Digest, Sha256};
+use walkdir::WalkDir;
 use std::io::{BufRead, BufReader, Read};
+use std::os::unix::fs::{chown, MetadataExt};
 use std::{
     fs::{self, remove_file, File},
     os::unix::prelude::PermissionsExt,
@@ -139,6 +141,64 @@ pub fn make_dir_perm(folder_name: &str, permissions: u32) -> Result<(), SystemEr
         })
 }
 
+
+/// Recursively changes ownership of all files and directories in the given directory.
+///
+/// # Arguments
+///
+/// * `dir` - A path to the directory whose contents will have their ownership changed.
+/// * `uid` - An optional new UID (user ID) to set for the files and directories. If `None`, the UID
+///           of the files and directories will not be changed.
+/// * `gid` - An optional new GID (group ID) to set for the files and directories. If `None`, the GID
+///           of the files and directories will not be changed.
+///
+/// # Errors
+///
+/// This function returns an error if there are any issues traversing the directory or changing
+/// ownership of its contents.
+///
+/// # Example
+///
+/// ```no_run
+/// use std::io;
+///
+/// fn main() -> Result<(), io::Error> {
+///     // Apply chown recursively to /path/to/directory with UID 1000 and GID 1000
+///     chown_recursive("/path/to/directory", Some(1000), Some(1000))?;
+///     Ok(())
+/// }
+/// ```
+pub fn chown_recursive<P: AsRef<PathType> + std::convert::AsRef<std::path::Path>>(
+    dir: P,
+    uid: Option<u32>,
+    gid: Option<u32>,
+) -> Result<(), SystemError> {
+    for entry in WalkDir::new(dir).follow_links(true) {
+        let entry = entry?;
+        let path = entry.path();
+
+        // Retrieve metadata of the file/directory
+        let metadata = fs::metadata(&path)?;
+
+        // Change ownership if it's a file or directory
+        if metadata.is_file() || metadata.is_dir() {
+            // Set new ownership using the `chown` function
+            match (uid, gid) {
+                (Some(uid), Some(gid)) => {
+                    chown(&path, Some(uid), Some(gid))?;
+                }
+                (Some(uid), None) => {
+                    chown(&path, Some(uid), Some(metadata.permissions().mode()))?;
+                }
+                (None, Some(gid)) => {
+                    chown(&path, Some(metadata.uid()), Some(gid))?;
+                }
+                _ => {}
+            }
+        }
+    }
+    Ok(())
+}
 
 /// Deprecated function. Use `path_present` instead.
 ///
