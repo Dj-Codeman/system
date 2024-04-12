@@ -169,11 +169,12 @@ pub fn make_dir_perm(folder_name: &str, permissions: u32) -> Result<(), SystemEr
 /// }
 /// ```
 pub fn chown_recursive(
-    dir: &PathType,
+    dir: PathType,
     uid: Option<u32>,
     gid: Option<u32>,
 ) -> Result<(), SystemError> {
-    for entry in WalkDir::new(dir.to_path_buf()).follow_links(false) {
+    let needed_type = dir.to_path_buf();
+    for entry in WalkDir::new(needed_type.as_path()).follow_links(false) {
         let entry = entry?;
         let path = entry.path();
 
