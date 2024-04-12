@@ -168,12 +168,12 @@ pub fn make_dir_perm(folder_name: &str, permissions: u32) -> Result<(), SystemEr
 ///     Ok(())
 /// }
 /// ```
-pub fn chown_recursive<P: AsRef<PathType> + std::convert::AsRef<std::path::Path>>(
-    dir: P,
+pub fn chown_recursive(
+    dir: &PathType,
     uid: Option<u32>,
     gid: Option<u32>,
 ) -> Result<(), SystemError> {
-    for entry in WalkDir::new(dir).follow_links(true) {
+    for entry in WalkDir::new(dir.to_path_buf()).follow_links(false) {
         let entry = entry?;
         let path = entry.path();
 
