@@ -1,5 +1,8 @@
 pub mod custom_type;
+pub mod custom_errors;
+#[deprecated(since = "0.1.0", note = "please use `path_present` instead")]
 pub mod errors;
+
 
 pub use custom_type::{CopyPath, PathType, ClonePath};
 pub use errors::SystemError;
@@ -472,13 +475,13 @@ mod tests {
     #[test]
     #[allow(deprecated)]
     fn ispath_test() {
-        let result = is_path("/tmp/definatly_real_path");
+        let result = is_path("/tmp/definitely_real_path");
         assert_eq!(result, false);
     }
 
     #[test]
     fn path_present_test() {
-        let path: &PathType = &PathType::Str("/tmp/definatly_real_path".into());
+        let path: &PathType = &PathType::Str("/tmp/definitely_real_path".into());
         let result: bool = path_present(path).unwrap();
         assert_eq!(result, false)
     }

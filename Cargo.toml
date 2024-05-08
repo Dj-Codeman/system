@@ -13,3 +13,4 @@ sha2 = "0.10"
 flate2 = "1.0"
 tar = "0.4"
 walkdir = "2.3"
+pretty = { git = "https://github.com/Dj-Codeman/pretty.git" }
