@@ -1,5 +1,7 @@
 use std::{
-    fmt, ops::Deref, path::{Path, PathBuf}
+    fmt,
+    ops::Deref,
+    path::{Path, PathBuf},
 };
 
 use serde::{Deserialize, Serialize};
