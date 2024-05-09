@@ -8,17 +8,21 @@ use serde::{Deserialize, Serialize};
 
 /// Represents different types of paths.
 ///
-/// This enum can hold different types of paths:
+/// This enum can hold various types of paths:
 ///
-/// - `PathBuf`: Represents a owned path buffer.
+/// - `PathBuf`: Represents an owned path buffer.
 /// - `Path`: Represents a borrowed path.
 /// - `str`: Represents a borrowed string path.
 /// - `Content`: Represents a path as a string content.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub enum PathType {
+    /// Represents an owned path buffer.
     PathBuf(PathBuf),
+    /// Represents a borrowed path.
     Path(Box<Path>),
+    /// Represents a borrowed string path.
     Str(Box<str>),
+    /// Represents a path as a string content.
     Content(String),
 }
 
@@ -59,13 +63,9 @@ impl CopyPath for PathType {
 }
 
 impl PathType {
+    /// Converts the `PathType` into a `PathBuf`.
     pub fn to_path_buf(&self) -> PathBuf {
-        match self {
-            PathType::PathBuf(path_buf) => path_buf.clone(),
-            PathType::Path(path) => path.as_ref().to_path_buf(),
-            PathType::Str(str_box) => PathBuf::from(&**str_box),
-            PathType::Content(content) => PathBuf::from(content),
-        }
+        self.copy_path()
     }
 }
 
