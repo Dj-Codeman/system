@@ -12,51 +12,92 @@ use std::{
 /// Represents different types of generic errors.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Errors {
+    /// Error encountered while opening a file.
     OpeningFile,
+    /// Error encountered while reading from a file.
     ReadingFile,
+    /// Error encountered while creating a file.
     CreatingFile,
+    /// Error encountered while creating a directory.
     CreatingDirectory,
+    /// Error encountered while deleting a directory.
     DeletingDirectory,
+    /// Error encountered while deleting a file.
     DeletingFile,
+    /// Error encountered while setting permissions on a directory.
     SettingPermissionsDirectory,
+    /// Error encountered while setting permissions on a file.
     SettingPermissionsFile,
+    /// Error encountered while untaring a file.
     UntaringFile,
+    /// General input/output error.
     InputOutput,
+    /// General error.
     GeneralError,
+    /// Initialization error.
     InitializationError,
+    /// Error related to a secret array.
     SecretArray,
+    /// Error encountered while creating JSON data.
     JsonCreation,
+    /// Error encountered while reading JSON data.
     JsonReading,
+    /// Invalid data type.
     InvalidType,
+    /// Invalid chunk data.
     InvalidChunkData,
+    /// Invalid HMAC data.
     InvalidHMACData,
+    /// Invalid HMAC size.
     InvalidHMACSize,
+    /// Invalid encryption key.
     InvalidKey,
+    /// Invalid hexadecimal data.
     InvalidHexData,
+    /// Invalid initialization vector (IV) data.
     InvalidIvData,
+    /// Invalid block data.
     InvalidBlockData,
+    /// Invalid authentication request.
     InvalidAuthRequest,
+    /// Invalid map request.
     InvalidMapRequest,
+    /// Invalid map version.
     InvalidMapVersion,
+    /// Invalid map data.
     InvalidMapData,
+    /// Invalid map hash.
     InvalidMapHash,
+    /// Invalid buffer fit.
     InvalidBufferFit,
+    /// Invalid UTF-8 data.
     InvalidUtf8Data,
+    /// Invalid signature.
     InvalidSignature,
+    /// Invalid file.
     InvalidFile,
+    /// Permission denied.
     PermissionDenied,
+    /// Resource not found.
     NotFound,
+    /// Out of memory.
     OutOfMemory,
+    /// Connection error.
     ConnectionError,
+    /// Timeout error.
     Timeout,
+    /// Authentication error.
     AuthenticationError,
+    /// Unauthorized access.
     Unauthorized,
 }
 
 /// Represents a generic error.
 #[derive(Debug)]
 pub struct ErrorArrayItem {
+    /// Type of the error.
     pub err_type: Errors,
+    /// Message associated with the error.
     pub err_mesg: String,
 }
 
@@ -73,28 +114,38 @@ impl ErrorArrayItem {
 /// Represents a collection of warnings.
 #[derive(Debug, Clone)]
 pub struct WarningArray(pub Arc<RwLock<Vec<WarningArrayItem>>>);
-/// Represents a collection of errors.
 
+/// Represents a collection of errors.
 #[derive(Debug, Clone)]
 pub struct ErrorArray(pub Arc<RwLock<Vec<ErrorArrayItem>>>);
 
 /// Represents different types of generic warnings.
 #[derive(Debug, PartialEq, Clone, Copy, PartialOrd)]
 pub enum Warnings {
+    /// Generic warning.
     Warning,
+    /// Warning indicating an outdated version.
     OutdatedVersion,
+    /// Warning indicating a misaligned chunk.
     MisAlignedChunk,
+    /// Warning indicating failure to delete a file.
     FileNotDeleted,
+    /// Warning indicating a lost connection.
     ConnectionLost,
+    /// Warning indicating resource exhaustion.
     ResourceExhaustion,
+    /// Warning indicating unexpected behavior.
     UnexpectedBehavior,
+    /// Warning indicating unexpected configuration.
     UnexpectedConfiguration,
 }
 
 /// Represents a generic warning.
 #[derive(Debug)]
 pub struct WarningArrayItem {
+    /// Type of the warning.
     pub warn_type: Warnings,
+    /// Optional message associated with the warning.
     pub warn_mesg: Option<String>,
 }
 
@@ -194,24 +245,28 @@ impl ErrorArray {
 /// Represents a unified result that can contain data or errors.
 #[derive(Debug)]
 pub enum UnifiedResult<T> {
+    /// Result variant containing data and warnings.
     ResultWarning(Result<OkWarning<T>, ErrorArray>),
+    /// Result variant containing data only.
     ResultNoWarns(Result<T, ErrorArray>),
 }
-// pub struct UnifiedResult<T>(Result<OkWarning<T>, ErrorArray>);
 
 /// Represents a result that contains data and warnings.
 #[derive(Debug)]
 pub struct OkWarning<T> {
+    /// Data associated with the result.
     pub data: T,
+    /// Warnings associated with the result.
     pub warning: WarningArray,
 }
 
 impl<T> UnifiedResult<T> {
-    /// Creates a new `UnifiedResult` instance.
+    /// Creates a new `UnifiedResult` instance with warnings.
     pub fn new_warn(result: Result<OkWarning<T>, ErrorArray>) -> Self {
         UnifiedResult::ResultWarning(result)
     }
 
+    /// Creates a new `UnifiedResult` instance without warnings.
     pub fn new(result: Result<T, ErrorArray>) -> Self {
         UnifiedResult::ResultNoWarns(result)
     }
@@ -276,8 +331,8 @@ impl<T> FromResidual<Result<Infallible, UnifiedResult<T>>> for UnifiedResult<T> 
 impl fmt::Display for WarningArrayItem {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.warn_mesg {
-            Some(d) => write!(f, "WarningArray: {:#?} - {}", self.warn_type, d),
-            None => write!(f, "WarningArray"),
+            Some(d) => write!(f, "Warning: {:#?} - {}", self.warn_type, d),
+            None => write!(f, "Warning"),
         }
     }
 }
