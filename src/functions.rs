@@ -216,24 +216,6 @@ pub fn chown_recursive(
     Ok(())
 }
 
-/// Deprecated function. Use `path_present` instead.
-///
-/// # Arguments
-///
-/// * `path` - The path to check for existence.
-///
-/// # Returns
-///
-/// Returns `true` if the path exists, otherwise `false`.
-#[deprecated(since = "0.0.1", note = "please use `path_present` instead")]
-pub fn is_path(path: &str) -> uf<bool> {
-    if std::path::Path::new(path).exists() {
-        return uf::new(Ok(true));
-    } else {
-        return uf::new(Ok(false));
-    }
-}
-
 /// Checks if a path exists.
 ///
 /// # Arguments
@@ -380,9 +362,10 @@ pub fn del_file(path: PathType, mut errors: ErrorArray, mut warnings: WarningArr
             },
             false => {
                 warnings.push(WarningArrayItem::new(Warnings::FileNotDeleted));
-                return uf::new_warn(Ok(OkWarning{
-                data: (),
-                warning: warnings})) // If the file never existed in the first place
+                return uf::new_warn(Ok(OkWarning {
+                    data: (),
+                    warning: warnings,
+                })); // If the file never existed in the first place
             }
         },
         Err(e) => return uf::new(Err(e)),
@@ -424,133 +407,143 @@ fn open_file(file: PathType, mut errors: ErrorArray) -> uf<File> {
     return uf::new(Ok(file));
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::generate_random_string;
-//     use super::*;
-//     use std::path::PathBuf;
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+    const NON_EXISTING_FILE: &str = "non_existing_file.txt";
+    const TARGET_STRING: &str = "Line 2";
 
-//     fn get_path() -> PathType {
-//         let name = create_hash("dummy_test".to_string());
-//         let mut path = String::new();
-//         path.push_str("/tmp/");
-//         path.push_str(&name);
-//         return PathType::Content(path);
-//     }
+    fn get_errors() -> ErrorArray {
+        ErrorArray::new_container()
+    }
 
-//     fn get_file() -> PathType {
-//         let name = create_hash("dummy_test".to_string());
-//         let mut path = String::new();
-//         path.push_str("/tmp/");
-//         path.push_str(&name);
-//         path.push_str(".file");
-//         return PathType::Content(path);
-//     }
+    fn get_warnings() -> WarningArray {
+        WarningArray::new_container()
+    }
 
-//     #[test]
-//     fn random_string() {
-//         let test_string: String = generate_random_string(10).unwrap();
-//         assert_eq!(test_string.len(), 10);
-//     }
+    fn get_path() -> PathType {
+        let name = create_hash("dummy_test".to_string());
+        let mut path = String::new();
+        path.push_str("/tmp/");
+        path.push_str(&name);
+        return PathType::Content(path);
+    }
 
-//     #[test]
-//     fn trimming() {
-//         let result = truncate("Hello, World", 5);
-//         assert_eq!(result, "Hello");
-//     }
+    fn get_file() -> PathType {
+        let name = create_hash("dummy_test".to_string());
+        let mut path = String::new();
+        path.push_str("/tmp/");
+        path.push_str(&name);
+        path.push_str(".file");
+        return PathType::Content(path);
+    }
 
-//     #[test]
-//     #[allow(deprecated)]
-//     fn ispath_test() {
-//         let result = is_path("/tmp/definitely_real_path");
-//         assert_eq!(result, UnifiedResult::new(Ok(false)));
-//     }
+    #[test]
+    fn random_string() {
+        let test_string: String = generate_random_string(10, get_errors()).unwrap();
+        assert_eq!(test_string.len(), 10);
+    }
 
-//     #[test]
-//     fn path_present_test() {
-//         let path: &PathType = &PathType::Str("/tmp/definitely_real_path".into());
-//         let result: bool = path_present(path).unwrap();
-//         assert_eq!(result, false)
-//     }
+    #[test]
+    fn trimming() {
+        let result = truncate("Hello, World", 5);
+        assert_eq!(result, "Hello");
+    }
 
-//     #[test]
-//     fn hash() {
-//         let result = create_hash("hash".to_string());
-//         assert_eq!(
-//             result,
-//             "d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa".to_string()
-//         );
-//     }
+    #[test]
+    fn path_present_test() {
+        let path: &PathType = &PathType::Str("/tmp/definitely_real_path".into());
+        let result: bool = path_present(path, get_errors()).unwrap();
+        assert_eq!(result, false)
+    }
 
-//     #[test]
-//     fn create_dir() {
-//         let result = make_dir(get_path()).unwrap();
-//         assert_eq!(result, true);
-//     }
+    #[test]
+    fn hash() {
+        let result = create_hash("hash".to_string());
+        assert_eq!(
+            result,
+            "d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa".to_string()
+        );
+    }
 
-//     #[test]
-//     fn destroy_dir() {
-//         make_dir(get_path()).unwrap();
-//         let result = del_dir(&get_path()).unwrap();
-//         assert_eq!(result, true);
-//     }
+    #[test]
+    fn create_dir() {
+        let result = make_dir(get_path(), get_errors()).unwrap();
+        assert_eq!(result, true);
+    }
 
-//     #[test]
-//     fn create_file() {
-//         let result: bool = make_file(get_file()).unwrap();
-//         assert_eq!(result, true);
-//     }
+    #[test]
+    fn destroy_dir() {
+        make_dir(get_path(), get_errors()).unwrap();
+        let result = del_dir(&get_path(), get_errors()).unwrap();
+        assert_eq!(result, true);
+    }
 
-//     #[test]
-//     fn delete_file() {
-//         let _ = make_file(get_file());
-//         let _ = del_file(get_file());
-//         assert_eq!(path_present(&get_file()).unwrap(), false);
-//     }
+    #[test]
+    fn create_file() {
+        let result: bool = make_file(get_file(), get_errors()).unwrap();
+        assert_eq!(result, true);
+    }
 
-//     #[test]
-//     fn test_is_string_in_file() {
-//         use std::io::Write;
-//         // Create a temporary file for testing
-//         let tmp_file_path = "test_file.txt";
-//         let mut file = File::create(tmp_file_path).unwrap();
-//         writeln!(file, "Line 1").unwrap();
-//         writeln!(file, "Line 2").unwrap();
-//         writeln!(file, "Line 3").unwrap();
+    #[test]
+    fn delete_file() {
+        let _ = make_file(get_file(), get_errors());
+        let _ = del_file(get_file(), get_errors(), get_warnings());
+        assert_eq!(path_present(&get_file(), get_errors()).unwrap(), false);
+    }
 
-//         // Test with a string that exists in the file
-//         let path_buf = PathType::Str(tmp_file_path.into());
-//         let target_string = "Line 2";
-//         assert_eq!(
-//             is_string_in_file(&PathType::PathBuf(path_buf.to_path_buf()), target_string).unwrap(),
-//             true
-//         );
+    #[test]
+    fn test_is_string_in_file() {
+        use std::io::Write;
+        // Create a temporary file for testing
+        let tmp_file_path = "test_file.txt";
+        let mut file = File::create(tmp_file_path).unwrap();
+        writeln!(file, "Line 1").unwrap();
+        writeln!(file, "Line 2").unwrap();
+        writeln!(file, "Line 3").unwrap();
 
-//         // Test with a string that does not exist in the file
-//         let non_existing_target = "Non-existing line";
-//         assert_eq!(
-//             is_string_in_file(
-//                 &PathType::PathBuf(path_buf.to_path_buf()),
-//                 non_existing_target
-//             )
-//             .unwrap(),
-//             false
-//         );
+        // Test with a string that exists in the file
+        let path_buf = PathType::Str(tmp_file_path.into());
+        assert_eq!(
+            is_string_in_file(
+                &PathType::PathBuf(path_buf.to_path_buf()),
+                TARGET_STRING,
+                get_errors()
+            )
+            .unwrap(),
+            true
+        );
 
-//         // Test with a file that does not exist
-//         let non_existing_file: &str = "non_existing_file.txt";
-//         assert_eq!(
-//             is_string_in_file(
-//                 &PathType::PathBuf(PathBuf::from(non_existing_file)),
-//                 target_string
-//             ),
-//             Err(ErrorArrayItem::new_details(
-//                 errors_dep::SystemErrorType::ErrorOpeningFile,
-//                 "No such file or directory (os error 2)"
-//             ))
-//         );
+        // Test with a string that does not exist in the file
+        let non_existing_target = "Non-existing line";
+        assert_eq!(
+            is_string_in_file(
+                &PathType::PathBuf(path_buf.to_path_buf()),
+                non_existing_target,
+                get_errors()
+            )
+            .unwrap(),
+            false
+        );
 
-//         // Clean up the temporary file
-//         del_file(PathType::Str(tmp_file_path.into())).unwrap();
-//     }
-// }
+        // Clean up the temporary file
+        del_file(
+            PathType::Str(tmp_file_path.into()),
+            get_errors(),
+            get_warnings(),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_is_string_in_file_fail() {
+        is_string_in_file(
+            &PathType::PathBuf(PathBuf::from(NON_EXISTING_FILE)),
+            TARGET_STRING,
+            get_errors(),
+        )
+        .unwrap();
+    }
+}
