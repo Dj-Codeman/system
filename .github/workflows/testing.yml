@@ -71,6 +71,7 @@ jobs:
       - id: pretty-test
         name: Run cargo pretty-test
         run: |
+          cargo install pretty-test
           cargo pretty-test --color=always
           echo '```text' >> $GITHUB_STEP_SUMMARY
           echo "$(cargo pretty-test --color=never)" >> $GITHUB_STEP_SUMMARY
