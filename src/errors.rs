@@ -1,9 +1,9 @@
 use pretty::warn;
 use std::{
     collections,
-    convert::Infallible,
+    // convert::Infallible,
     fmt, io, net,
-    ops::FromResidual,
+    // ops::FromResidual,
     path,
     sync::{self, Arc, RwLock},
     thread, time,
@@ -203,6 +203,11 @@ impl WarningArray {
         warning_array.push(item);
         drop(warning_array)
     }
+
+    pub fn len(&self) -> usize {
+        let vec = self.0.read().unwrap(); // Lock the RwLock and get a read guard
+        vec.len()
+    }
 }
 
 impl ErrorArray {
@@ -239,6 +244,11 @@ impl ErrorArray {
     pub fn push(&mut self, item: ErrorArrayItem) {
         let mut error_array = self.0.write().unwrap();
         error_array.push(item);
+    }
+
+    pub fn len(&self) -> usize {
+        let vec = self.0.read().unwrap(); // Lock the RwLock and get a read guard
+        vec.len()
     }
 }
 
@@ -309,23 +319,31 @@ impl<T> UnifiedResult<T> {
             UnifiedResult::ResultNoWarns(r) => return r,
         }
     }
-}
 
-// Implement FromResidual<Result<Infallible, UnifiedResult<_>>> for UnifiedResult
-impl<T> FromResidual<Result<Infallible, UnifiedResult<T>>> for UnifiedResult<T> {
-    fn from_residual(residual: Result<Infallible, UnifiedResult<T>>) -> Self {
-        match residual.unwrap_err() {
-            UnifiedResult::ResultWarning(_) => {
-                // Since Infallible can never be constructed, this code path is unreachable
-                unreachable!()
-            }
-            UnifiedResult::ResultNoWarns(_) => {
-                // Since Infallible can never be constructed, this code path is unreachable
-                unreachable!()
-            }
+    /// Determins if the value in UnifiedResult is Ok()
+    pub const fn is_ok(&self) -> bool {
+        match &self {
+            UnifiedResult::ResultWarning(d) => matches!(d, Ok(_)),
+            UnifiedResult::ResultNoWarns(d) => matches!(d, Ok(_)),
         }
     }
 }
+
+// Implement FromResidual<Result<Infallible, UnifiedResult<_>>> for UnifiedResult
+// impl<T> FromResidual<Result<Infallible, UnifiedResult<T>>> for UnifiedResult<T> {
+//     fn from_residual(residual: Result<Infallible, UnifiedResult<T>>) -> Self {
+//         match residual.unwrap_err() {
+//             UnifiedResult::ResultWarning(_) => {
+//                 // Since Infallible can never be constructed, this code path is unreachable
+//                 unreachable!()
+//             }
+//             UnifiedResult::ResultNoWarns(_) => {
+//                 // Since Infallible can never be constructed, this code path is unreachable
+//                 unreachable!()
+//             }
+//         }
+//     }
+// }
 
 // Pretty display for WarningArrayItem
 impl fmt::Display for WarningArrayItem {

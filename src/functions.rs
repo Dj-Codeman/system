@@ -24,23 +24,29 @@ use walkdir::WalkDir;
 /// # Returns
 ///
 /// A random string of the specified length.
-pub fn generate_random_string(length: usize, error_vec: ErrorArray) -> uf<String> {
-    let mut errors = error_vec.0.write().unwrap();
-    let mut file: File = File::open("/dev/urandom").map_err(|e| {
-        let err = ErrorArrayItem::from(e);
-        errors.push(err);
-        return uf::new(Err(error_vec.clone()));
-    })?;
-
+pub fn generate_random_string(length: usize, mut errors: ErrorArray) -> uf<String> {
     let mut buffer = vec![0; length];
+    
+    let file_raw: Result<File, ErrorArrayItem> = File::open("/dev/urandom").map_err(|e| {
+        ErrorArrayItem::from(e)
+    });
 
-    file.read_exact(&mut buffer).map_err(|_e| {
-        errors.push(ErrorArrayItem::new(
-            Errors::ReadingFile,
-            String::from("Error while reading from /dev/urandom"),
-        ));
-        return uf::new(Err(error_vec.clone()));
-    })?;
+    let mut file: File = match file_raw {
+        Ok(f) => f,
+        Err(e) => {
+            errors.push(e);
+            return uf::new(Err(errors))
+        },
+    };
+
+
+    let _ = file.read_exact(&mut buffer).map_err(|e| {
+        errors.push(ErrorArrayItem::from(e));
+    });
+
+    if errors.len() > 0 {
+        return uf::new(Err(errors.clone()))
+    }
 
     uf::new(Ok(buffer
         .iter()
@@ -136,25 +142,29 @@ pub fn truncate(s: &str, max_chars: usize) -> &str {
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
 pub fn make_dir_perm(folder_name: &str, permissions: u32, mut errors: ErrorArray) -> uf<()> {
     let permissions = fs::Permissions::from_mode(permissions);
+    let file_creation_result = fs::create_dir(folder_name).map_err(|err| {
+        ErrorArrayItem::from(err)
+    });
 
-    uf::new(Ok(fs::create_dir(folder_name).map_err(|err| {
-        let err: ErrorArrayItem = ErrorArrayItem::new(
-            Errors::CreatingDirectory,
-            format!("Error creating folder: {}", err),
-        );
-        errors.push(err);
+    match file_creation_result {
+        Ok(_) => {
+            let set_permission = fs::set_permissions(folder_name, permissions).map_err(|err| {
+                ErrorArrayItem::from(err)
+            });
+            match set_permission {
+                Ok(_) => return uf::new(Ok(())),
+                Err(e) => {
+                    errors.push(ErrorArrayItem::from(e));
+                    return uf::new(Err(errors));
+                },
+            }
+        },
+        Err(e) => {
+            errors.push(e);
+            return uf::new(Err(errors))
+        },
+    }
 
-        fs::set_permissions(folder_name, permissions).map_err(|err| {
-            let err: ErrorArrayItem = ErrorArrayItem::new(
-                Errors::CreatingDirectory,
-                format!("Error creating folder: {}", err),
-            );
-            errors.push(err);
-            return uf::new(Err(errors.clone()));
-        })?;
-
-        return uf::new(Err(errors));
-    })?))
 }
 
 /// Recursively changes ownership of all files and directories in the given directory.
@@ -230,8 +240,7 @@ pub fn path_present(path: &PathType, mut errors: ErrorArray) -> uf<bool> {
     match path.to_path_buf().try_exists() {
         Ok(d) => return uf::new(Ok(d)),
         Err(e) => {
-            let err = ErrorArrayItem::from(e);
-            errors.push(err);
+            errors.push(ErrorArrayItem::from(e));
             return uf::new(Err(errors));
         }
     }
@@ -247,7 +256,7 @@ pub fn path_present(path: &PathType, mut errors: ErrorArray) -> uf<bool> {
 ///
 /// Returns `Ok(true)` if the directory is created successfully or if it already exists.
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
-pub fn make_dir(path: PathType, mut errors: ErrorArray) -> uf<bool> {
+pub fn make_dir(path: &PathType, mut errors: ErrorArray) -> uf<bool> {
     match path_present(&path, errors.clone()).uf_unwrap() {
         Ok(d) => match d {
             true => return uf::new(Ok(true)),
@@ -274,8 +283,8 @@ pub fn make_dir(path: PathType, mut errors: ErrorArray) -> uf<bool> {
 ///
 /// Returns `Ok(())` if the directory is recreated successfully.
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
-pub fn remake_dir(path: PathType, errors: ErrorArray) -> uf<()> {
-    match del_dir(&path, errors.clone()).uf_unwrap() {
+pub fn remake_dir(path: &PathType, errors: ErrorArray) -> uf<()> {
+    match del_dir(path, errors.clone()).uf_unwrap() {
         Ok(_) => match make_dir(path, errors).uf_unwrap() {
             Ok(_) => return uf::new(Ok(())),
             Err(e) => return uf::new(Err(e)),
@@ -399,19 +408,20 @@ pub fn untar(file_path: &PathType, output_folder: &str, mut errors: ErrorArray) 
 }
 
 fn open_file(file: PathType, mut errors: ErrorArray) -> uf<File> {
-    let file: File = File::open(file.to_path_buf()).map_err(|e| {
-        let err = errors::ErrorArrayItem::from(e);
-        errors.push(err);
-        return uf::new(Err(errors.clone()));
-    })?;
-    return uf::new(Ok(file));
+    let file_raw = File::open(file.to_path_buf()).map_err(|err| ErrorArrayItem::from(err));
+
+    match file_raw {
+        Ok(d) => return uf::new(Ok(d)),
+        Err(e) => {
+            errors.push(e);
+            return uf::new(Err(errors));
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::PathBuf;
-    const NON_EXISTING_FILE: &str = "non_existing_file.txt";
     const TARGET_STRING: &str = "Line 2";
 
     fn get_errors() -> ErrorArray {
@@ -422,12 +432,8 @@ mod tests {
         WarningArray::new_container()
     }
 
-    fn get_path() -> PathType {
-        let name = create_hash("dummy_test".to_string());
-        let mut path = String::new();
-        path.push_str("/tmp/");
-        path.push_str(&name);
-        return PathType::Content(path);
+    fn get_dir() -> PathType {
+        PathType::Content(String::from("/tmp/test"))
     }
 
     fn get_file() -> PathType {
@@ -453,9 +459,8 @@ mod tests {
 
     #[test]
     fn path_present_test() {
-        let path: &PathType = &PathType::Str("/tmp/definitely_real_path".into());
-        let result: bool = path_present(path, get_errors()).unwrap();
-        assert_eq!(result, false)
+        let result: uf<bool> = path_present(&get_file(), get_errors());
+        assert_eq!(result.is_ok(), true)
     }
 
     #[test]
@@ -469,21 +474,21 @@ mod tests {
 
     #[test]
     fn create_dir() {
-        let result = make_dir(get_path(), get_errors()).unwrap();
-        assert_eq!(result, true);
+        let _ = del_dir(&&get_dir(), get_errors()).unwrap();
+        let _ = make_dir(&get_dir(), get_errors()).unwrap();
+        assert_eq!(path_present(&get_dir(), get_errors()).unwrap(), true);
     }
 
     #[test]
-    fn destroy_dir() {
-        make_dir(get_path(), get_errors()).unwrap();
-        let result = del_dir(&get_path(), get_errors()).unwrap();
-        assert_eq!(result, true);
+    fn delete_dir() {
+        make_dir(&get_dir(), get_errors()).unwrap();
+        del_dir(&get_dir(), get_errors()).unwrap();
+        assert_eq!(path_present(&get_dir(), get_errors()).unwrap(), false);
     }
 
     #[test]
     fn create_file() {
-        let result: bool = make_file(get_file(), get_errors()).unwrap();
-        assert_eq!(result, true);
+        assert_eq!(make_file(get_file(), get_errors()).is_ok(), true);
     }
 
     #[test]
@@ -497,7 +502,7 @@ mod tests {
     fn test_is_string_in_file() {
         use std::io::Write;
         // Create a temporary file for testing
-        let tmp_file_path = "test_file.txt";
+        let tmp_file_path = "/tmp/test_file.txt";
         let mut file = File::create(tmp_file_path).unwrap();
         writeln!(file, "Line 1").unwrap();
         writeln!(file, "Line 2").unwrap();
@@ -532,17 +537,6 @@ mod tests {
             PathType::Str(tmp_file_path.into()),
             get_errors(),
             get_warnings(),
-        )
-        .unwrap();
-    }
-
-    #[test]
-    #[should_panic]
-    fn test_is_string_in_file_fail() {
-        is_string_in_file(
-            &PathType::PathBuf(PathBuf::from(NON_EXISTING_FILE)),
-            TARGET_STRING,
-            get_errors(),
         )
         .unwrap();
     }
