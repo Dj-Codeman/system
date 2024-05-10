@@ -535,3 +535,11 @@ mod tests {
         .unwrap();
     }
 }
+
+#[cfg(rust_comp_feature = "try_trait_v2")]
+mod tests {
+    #[test]
+    fn try_trait() {
+        assert_eq!(true, true)
+    }
+}

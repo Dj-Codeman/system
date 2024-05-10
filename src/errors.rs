@@ -5,7 +5,7 @@ use std::{
     thread, time,
 };
 
-#[rustversion::nightly]
+#[cfg(rust_comp_feature = "try_trait_v2")]
 use std::{convert::Infallible, ops::FromResidual};
 
 /// Represents different types of generic errors.
@@ -328,7 +328,7 @@ impl<T> UnifiedResult<T> {
     }
 }
 
-#[rustversion::nightly]
+#[cfg(rust_comp_feature = "try_trait_v2")]
 // Implement FromResidual<Result<Infallible, UnifiedResult<_>>> for UnifiedResult
 impl<T> FromResidual<Result<Infallible, UnifiedResult<T>>> for UnifiedResult<T> {
     fn from_residual(residual: Result<Infallible, UnifiedResult<T>>) -> Self {
