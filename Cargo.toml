@@ -18,3 +18,4 @@ pretty = { git = "https://github.com/Dj-Codeman/pretty.git" }
 rand = "0.8.5"
 reqwest = "0.12.4"
 serde_yaml = "0.9.34"
+rustversion = "1.0.16"

@@ -1,16 +1,12 @@
 use pretty::warn;
 use std::{
-    collections,
-    // convert::Infallible,
-    fmt,
-    io,
-    net,
-    // ops::FromResidual,
-    path,
+    collections, fmt, io, net, path,
     sync::{self, Arc, RwLock},
-    thread,
-    time,
+    thread, time,
 };
+
+#[rustversion::nightly]
+use std::{convert::Infallible, ops::FromResidual};
 
 /// Represents different types of generic errors.
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -332,21 +328,22 @@ impl<T> UnifiedResult<T> {
     }
 }
 
+#[rustversion::nightly]
 // Implement FromResidual<Result<Infallible, UnifiedResult<_>>> for UnifiedResult
-// impl<T> FromResidual<Result<Infallible, UnifiedResult<T>>> for UnifiedResult<T> {
-//     fn from_residual(residual: Result<Infallible, UnifiedResult<T>>) -> Self {
-//         match residual.unwrap_err() {
-//             UnifiedResult::ResultWarning(_) => {
-//                 // Since Infallible can never be constructed, this code path is unreachable
-//                 unreachable!()
-//             }
-//             UnifiedResult::ResultNoWarns(_) => {
-//                 // Since Infallible can never be constructed, this code path is unreachable
-//                 unreachable!()
-//             }
-//         }
-//     }
-// }
+impl<T> FromResidual<Result<Infallible, UnifiedResult<T>>> for UnifiedResult<T> {
+    fn from_residual(residual: Result<Infallible, UnifiedResult<T>>) -> Self {
+        match residual.unwrap_err() {
+            UnifiedResult::ResultWarning(_) => {
+                // Since Infallible can never be constructed, this code path is unreachable
+                unreachable!()
+            }
+            UnifiedResult::ResultNoWarns(_) => {
+                // Since Infallible can never be constructed, this code path is unreachable
+                unreachable!()
+            }
+        }
+    }
+}
 
 // Pretty display for WarningArrayItem
 impl fmt::Display for WarningArrayItem {
