@@ -2,11 +2,14 @@ use pretty::warn;
 use std::{
     collections,
     // convert::Infallible,
-    fmt, io, net,
+    fmt,
+    io,
+    net,
     // ops::FromResidual,
     path,
     sync::{self, Arc, RwLock},
-    thread, time,
+    thread,
+    time,
 };
 
 /// Represents different types of generic errors.
@@ -320,7 +323,7 @@ impl<T> UnifiedResult<T> {
         }
     }
 
-    /// Determins if the value in UnifiedResult is Ok()
+    /// Determines if the value in UnifiedResult is Ok()
     pub const fn is_ok(&self) -> bool {
         match &self {
             UnifiedResult::ResultWarning(d) => matches!(d, Ok(_)),

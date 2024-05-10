@@ -26,26 +26,24 @@ use walkdir::WalkDir;
 /// A random string of the specified length.
 pub fn generate_random_string(length: usize, mut errors: ErrorArray) -> uf<String> {
     let mut buffer = vec![0; length];
-    
-    let file_raw: Result<File, ErrorArrayItem> = File::open("/dev/urandom").map_err(|e| {
-        ErrorArrayItem::from(e)
-    });
+
+    let file_raw: Result<File, ErrorArrayItem> =
+        File::open("/dev/urandom").map_err(|e| ErrorArrayItem::from(e));
 
     let mut file: File = match file_raw {
         Ok(f) => f,
         Err(e) => {
             errors.push(e);
-            return uf::new(Err(errors))
-        },
+            return uf::new(Err(errors));
+        }
     };
-
 
     let _ = file.read_exact(&mut buffer).map_err(|e| {
         errors.push(ErrorArrayItem::from(e));
     });
 
     if errors.len() > 0 {
-        return uf::new(Err(errors.clone()))
+        return uf::new(Err(errors.clone()));
     }
 
     uf::new(Ok(buffer
@@ -142,29 +140,25 @@ pub fn truncate(s: &str, max_chars: usize) -> &str {
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
 pub fn make_dir_perm(folder_name: &str, permissions: u32, mut errors: ErrorArray) -> uf<()> {
     let permissions = fs::Permissions::from_mode(permissions);
-    let file_creation_result = fs::create_dir(folder_name).map_err(|err| {
-        ErrorArrayItem::from(err)
-    });
+    let file_creation_result = fs::create_dir(folder_name).map_err(|err| ErrorArrayItem::from(err));
 
     match file_creation_result {
         Ok(_) => {
-            let set_permission = fs::set_permissions(folder_name, permissions).map_err(|err| {
-                ErrorArrayItem::from(err)
-            });
+            let set_permission = fs::set_permissions(folder_name, permissions)
+                .map_err(|err| ErrorArrayItem::from(err));
             match set_permission {
                 Ok(_) => return uf::new(Ok(())),
                 Err(e) => {
                     errors.push(ErrorArrayItem::from(e));
                     return uf::new(Err(errors));
-                },
+                }
             }
-        },
+        }
         Err(e) => {
             errors.push(e);
-            return uf::new(Err(errors))
-        },
+            return uf::new(Err(errors));
+        }
     }
-
 }
 
 /// Recursively changes ownership of all files and directories in the given directory.
