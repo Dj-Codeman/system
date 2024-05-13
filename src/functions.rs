@@ -401,7 +401,7 @@ pub fn untar(file_path: &PathType, output_folder: &str, mut errors: ErrorArray) 
     }
 }
 
-fn open_file(file: PathType, mut errors: ErrorArray) -> uf<File> {
+pub fn open_file(file: PathType, mut errors: ErrorArray) -> uf<File> {
     let file_raw = File::open(file.to_path_buf()).map_err(|err| ErrorArrayItem::from(err));
 
     match file_raw {
