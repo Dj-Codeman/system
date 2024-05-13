@@ -212,8 +212,8 @@ impl WarningArray {
 impl ErrorArray {
     /// Creates a new `Errors` instance.
     pub fn new(mut data: Vec<ErrorArrayItem>) -> Self {
-        let error_array: Vec<ErrorArrayItem> = Vec::new();
-        let error = Self {
+        let error_array: Vec<ErrorArrayItem> = Vec::with_capacity(2);
+        let error: ErrorArray = Self {
             0: Arc::new(RwLock::new(error_array)),
         };
 
