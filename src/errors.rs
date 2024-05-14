@@ -2,7 +2,7 @@ use hex::FromHexError;
 use nix::errno::Errno;
 use pretty::warn;
 use std::{
-    collections, fmt, io, net, path, string::FromUtf8Error, sync::{self, Arc, RwLock}, thread, time
+    collections, fmt, io, net, num::ParseIntError, path, string::FromUtf8Error, sync::{self, Arc, RwLock}, thread, time
 };
 
 #[cfg(rust_comp_feature = "try_trait_v2")]
@@ -490,6 +490,13 @@ impl From<FromHexError> for ErrorArrayItem {
 // Conversion from nix errors to ErrorArrayItem
 impl From<Errno> for ErrorArrayItem {
     fn from(value: Errno) -> Self {
+        ErrorArrayItem::new(Errors::InputOutput, value.to_string())
+    }
+}
+
+// Conversion from ParseIntError errors to ErrorArrayItem
+impl From<ParseIntError> for ErrorArrayItem {
+    fn from(value: ParseIntError) -> Self {
         ErrorArrayItem::new(Errors::InputOutput, value.to_string())
     }
 }
