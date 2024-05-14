@@ -202,6 +202,13 @@ impl WarningArray {
         drop(warning_array)
     }
 
+    pub fn append(&mut self, arr: Self) {
+        let mut warning_array = self.0.write().unwrap();
+        let mut donor_array = arr.0.write().unwrap();
+        warning_array.append(&mut donor_array);
+        drop(donor_array);
+    }
+
     pub fn len(&self) -> usize {
         let vec = self.0.read().unwrap(); // Lock the RwLock and get a read guard
         vec.len()
