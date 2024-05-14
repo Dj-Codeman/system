@@ -245,6 +245,13 @@ impl ErrorArray {
         error_array.push(item);
     }
 
+    pub fn append(&mut self, arr: Self) {
+        let mut error_array = self.0.write().unwrap();
+        let mut donor_array = arr.0.write().unwrap();
+        error_array.append(&mut donor_array);
+        drop(donor_array);
+    }
+
     pub fn len(&self) -> usize {
         let vec = self.0.read().unwrap(); // Lock the RwLock and get a read guard
         vec.len()
@@ -458,3 +465,4 @@ impl From<walkdir::Error> for ErrorArrayItem {
         ErrorArrayItem::new(Errors::InputOutput, err.to_string())
     }
 }
+
