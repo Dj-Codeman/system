@@ -1,8 +1,6 @@
 use pretty::warn;
 use std::{
-    collections, fmt, io, net, path,
-    sync::{self, Arc, RwLock},
-    thread, time,
+    collections, fmt, io, net, path, str::Utf8Error, sync::{self, Arc, RwLock}, thread, time
 };
 
 #[cfg(rust_comp_feature = "try_trait_v2")]
@@ -466,3 +464,9 @@ impl From<walkdir::Error> for ErrorArrayItem {
     }
 }
 
+// Conversion from Utf8Error::Error to ErrorArrayItem
+impl From<Utf8Error> for ErrorArrayItem {
+    fn from(value: Utf8Error) -> Self {
+        ErrorArrayItem::new(Errors::InputOutput, value.to_string())
+    }
+}
