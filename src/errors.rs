@@ -1,4 +1,5 @@
 use hex::FromHexError;
+use nix::errno::Errno;
 use pretty::warn;
 use std::{
     collections, fmt, io, net, path, str::Utf8Error, sync::{self, Arc, RwLock}, thread, time
@@ -482,6 +483,13 @@ impl From<Utf8Error> for ErrorArrayItem {
 // Conversion from FromHexError::Error to ErrorArrayItem
 impl From<FromHexError> for ErrorArrayItem {
     fn from(value: FromHexError) -> Self {
+        ErrorArrayItem::new(Errors::InputOutput, value.to_string())
+    }
+}
+
+// Conversion from nix errors to ErrorArrayItem
+impl From<Errno> for ErrorArrayItem {
+    fn from(value: Errno) -> Self {
         ErrorArrayItem::new(Errors::InputOutput, value.to_string())
     }
 }
