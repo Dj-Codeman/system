@@ -1,3 +1,4 @@
+use hex::FromHexError;
 use pretty::warn;
 use std::{
     collections, fmt, io, net, path, str::Utf8Error, sync::{self, Arc, RwLock}, thread, time
@@ -467,6 +468,13 @@ impl From<walkdir::Error> for ErrorArrayItem {
 // Conversion from Utf8Error::Error to ErrorArrayItem
 impl From<Utf8Error> for ErrorArrayItem {
     fn from(value: Utf8Error) -> Self {
+        ErrorArrayItem::new(Errors::InputOutput, value.to_string())
+    }
+}
+
+// Conversion from FromHexError::Error to ErrorArrayItem
+impl From<FromHexError> for ErrorArrayItem {
+    fn from(value: FromHexError) -> Self {
         ErrorArrayItem::new(Errors::InputOutput, value.to_string())
     }
 }
