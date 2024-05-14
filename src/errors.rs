@@ -2,7 +2,7 @@ use hex::FromHexError;
 use nix::errno::Errno;
 use pretty::warn;
 use std::{
-    collections, fmt, io, net, num::ParseIntError, path, string::FromUtf8Error, sync::{self, Arc, RwLock}, thread, time
+    collections, fmt, io, net, num::ParseIntError, path, str::Utf8Error, string::FromUtf8Error, sync::{self, Arc, RwLock}, thread, time
 };
 
 #[cfg(rust_comp_feature = "try_trait_v2")]
@@ -473,12 +473,20 @@ impl From<walkdir::Error> for ErrorArrayItem {
     }
 }
 
-// Conversion from Utf8Error::Error to ErrorArrayItem
+// Conversion from FromUtf8Error::Error to ErrorArrayItem
 impl From<FromUtf8Error> for ErrorArrayItem {
     fn from(value: FromUtf8Error) -> Self {
         ErrorArrayItem::new(Errors::InputOutput, value.to_string())
     }
 }
+
+// Conversion from Utf8Error::Error to ErrorArrayItem
+impl From<Utf8Error> for ErrorArrayItem {
+    fn from(value: Utf8Error) -> Self {
+        ErrorArrayItem::new(Errors::InputOutput, value.to_string())
+    }
+}
+
 
 // Conversion from FromHexError::Error to ErrorArrayItem
 impl From<FromHexError> for ErrorArrayItem {
