@@ -401,6 +401,15 @@ pub fn untar(file_path: &PathType, output_folder: &str, mut errors: ErrorArray) 
     }
 }
 
+/// Opens a file.
+///
+/// # Arguments
+///
+/// * `path` - The path of the file to delete.
+///
+/// # Returns
+/// Returns `Ok(file)` if the file exists and can be opened.
+/// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
 pub fn open_file(file: PathType, mut errors: ErrorArray) -> uf<File> {
     let file_raw = File::open(file.to_path_buf()).map_err(|err| ErrorArrayItem::from(err));
 
