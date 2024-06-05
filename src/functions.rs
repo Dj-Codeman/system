@@ -63,7 +63,7 @@ pub fn generate_random_string(length: usize, mut errors: ErrorArray) -> uf<Strin
 ///
 /// Returns `Ok(true)` if the target string is found, otherwise `Ok(false)`.
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
-// pub fn is_string_in_file(file_path: &PathType, target_string: &str) -> Result<bool, ErrorArrayItem> {
+#[allow(deprecated)]    
 pub fn is_string_in_file(
     file_path: &PathType,
     target_string: &str,
@@ -386,6 +386,7 @@ pub fn del_file(path: PathType, mut errors: ErrorArray, mut warnings: WarningArr
 ///
 /// Returns `Ok(())` if the extraction is successful.
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
+#[allow(deprecated)]
 pub fn untar(file_path: &PathType, output_folder: &str, mut errors: ErrorArray) -> uf<()> {
     let tar_file: File = open_file(file_path.clone_path(), errors.clone()).unwrap();
     let tar_reader: BufReader<File> = BufReader::new(tar_file);
