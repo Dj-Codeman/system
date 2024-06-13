@@ -196,10 +196,11 @@ impl WarningArray {
 
     /// Displays the warnings.
     pub fn display(self) {
-        let warning_array = self.0.read().unwrap();
+        let mut warning_array = self.0.write().unwrap();
         for warns in warning_array.as_slice() {
             warn(&format!("{}", warns))
         }
+        warning_array.clear()
     }
 
     /// Pushes a new warning to the collection.
