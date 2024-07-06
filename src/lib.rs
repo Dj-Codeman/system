@@ -6,3 +6,6 @@ pub mod errors;
 pub mod errors_dep;
 pub mod functions;
 pub mod types;
+
+#[path = "tests/errors_test.rs"]
+pub mod error_tests;

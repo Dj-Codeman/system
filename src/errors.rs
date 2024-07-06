@@ -95,10 +95,12 @@ pub enum Errors {
     AuthenticationError,
     /// Unauthorized access.
     Unauthorized,
+    /// Git Error.
+    Git,
 }
 
 /// Represents a generic error.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ErrorArrayItem {
     /// Type of the error.
     pub err_type: Errors,
@@ -146,7 +148,7 @@ pub enum Warnings {
 }
 
 /// Represents a generic warning.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct WarningArrayItem {
     /// Type of the warning.
     pub warn_type: Warnings,
@@ -247,12 +249,14 @@ impl ErrorArray {
 
     /// Displays the errors.
     pub fn display(self, die: bool) {
-        let error_array = self.0.read().unwrap();
+        let mut error_array = self.0.write().unwrap();
         for errors in error_array.as_slice() {
             output("RED", &format!("{}", errors))
         }
         if die {
             std::process::exit(1);
+        } else {
+            error_array.clear()
         }
     }
 
