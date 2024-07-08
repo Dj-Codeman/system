@@ -1,5 +1,5 @@
 use hex::FromHexError;
-use nix::errno::Errno;
+use nix::{errno::Errno, Error};
 use pretty::{output, warn};
 use std::{
     collections,
@@ -678,6 +678,12 @@ impl From<SystemError> for ErrorArrayItem {
 
 impl From<Infallible> for ErrorArrayItem {
     fn from(value: std::convert::Infallible) -> Self {
+        ErrorArrayItem::new(Errors::GeneralError, value.to_string())
+    }
+}
+
+impl From<block_modes::InvalidKeyIvLength> for ErrorArrayItem {
+    fn from(value: block_modes::InvalidKeyIvLength) -> Self {
         ErrorArrayItem::new(Errors::GeneralError, value.to_string())
     }
 }
