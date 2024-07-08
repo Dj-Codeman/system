@@ -24,4 +24,4 @@ nix = "0.23.0"
 
 # Old version for error conversions
 recs = { git = "https://github.com/Dj-Codeman/recs.git"}
-logging = { git = "https://github.com/Dj-Codeman/logger.git"}
+#logging = { git = "https://github.com/Dj-Codeman/logger.git"}
