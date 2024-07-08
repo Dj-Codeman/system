@@ -14,10 +14,12 @@ use std::{
 #[cfg(rust_comp_feature = "try_trait_v2")]
 use std::{convert::Infallible, ops::FromResidual};
 
-#[allow(deprecated)]
 // Imported for conversion to new items
+#[allow(deprecated)]
 use crate::errors_dep::SystemError;
+#[allow(deprecated)]
 use logging::errors::LoggerError;
+#[allow(deprecated)]
 use recs::errors::RecsError;
 
 /// Represents different types of generic errors.

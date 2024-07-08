@@ -9,5 +9,7 @@ pub mod types;
 
 #[path = "tests/errors.rs"]
 pub mod errors_test;
+#[path = "tests/functions.rs"]
+pub mod function_test;
 #[path = "tests/pathtype.rs"]
 pub mod types_test;

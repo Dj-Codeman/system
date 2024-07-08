@@ -23,5 +23,5 @@ cfg_rust_features = "0.1.2"
 nix = "0.23.0"
 
 # Old version for error conversions
-recs = { git = "https://github.com/Dj-Codeman/recs.git", rev = "f5fefc918c3853909fa1643b50f17e0bfa127d43"}
-logging = { git = "https://github.com/Dj-Codeman/logger.git", rev = "aaa9aba9662dd5486ce5d573de09c879b1fce1f5"}
+recs = { git = "https://github.com/Dj-Codeman/recs.git"}
+logging = { git = "https://github.com/Dj-Codeman/logger.git"}
