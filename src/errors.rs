@@ -685,13 +685,13 @@ impl From<SystemError> for ErrorArrayItem {
 //     }
 // }
 
-#[allow(deprecated)]
-// Conversion from deprecated recs Errors
-impl From<RecsError> for ErrorArrayItem {
-    fn from(value: RecsError) -> Self {
-        ErrorArrayItem::new(
-            Errors::DEPRECS,
-            value.details.unwrap_or(String::from("No message appended")),
-        )
-    }
-}
+// #[allow(deprecated)]
+// // Conversion from deprecated recs Errors
+// impl From<RecsError> for ErrorArrayItem {
+//     fn from(value: RecsError) -> Self {
+//         ErrorArrayItem::new(
+//             Errors::DEPRECS,
+//             value.details.unwrap_or(String::from("No message appended")),
+//         )
+//     }
+// }
