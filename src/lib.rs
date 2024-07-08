@@ -7,5 +7,7 @@ pub mod errors_dep;
 pub mod functions;
 pub mod types;
 
-#[path = "tests/errors_test.rs"]
-pub mod error_tests;
+#[path = "tests/errors.rs"]
+pub mod errors_test;
+#[path = "tests/pathtype.rs"]
+pub mod types_test;
