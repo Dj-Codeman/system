@@ -63,7 +63,7 @@ pub fn generate_random_string(length: usize, mut errors: ErrorArray) -> uf<Strin
 ///
 /// Returns `Ok(true)` if the target string is found, otherwise `Ok(false)`.
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
-#[allow(deprecated)]    
+#[allow(deprecated)]
 pub fn is_string_in_file(
     file_path: &PathType,
     target_string: &str,

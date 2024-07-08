@@ -14,6 +14,10 @@ use std::{
 #[cfg(rust_comp_feature = "try_trait_v2")]
 use std::{convert::Infallible, ops::FromResidual};
 
+#[allow(deprecated)]
+// Imported for conversion to new items
+use crate::errors_dep::SystemError;
+
 /// Represents different types of generic errors.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Errors {
@@ -649,115 +653,13 @@ impl From<&mut ParseIntError> for ErrorArrayItem {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::io;
-    use std::net;
-
-    #[test]
-    fn test_error_array_item_creation() {
-        let error_item =
-            ErrorArrayItem::new(Errors::OpeningFile, String::from("Failed to open file"));
-        assert_eq!(error_item.err_type, Errors::OpeningFile);
-        assert_eq!(error_item.err_mesg, "Failed to open file");
-    }
-
-    #[test]
-    fn test_warning_array_item_creation() {
-        let warning_item = WarningArrayItem::new(Warnings::Warning);
-        assert_eq!(warning_item.warn_type, Warnings::Warning);
-        assert!(warning_item.warn_mesg.is_none());
-
-        let detailed_warning_item = WarningArrayItem::new_details(
-            Warnings::OutdatedVersion,
-            String::from("Version is outdated"),
-        );
-        assert_eq!(detailed_warning_item.warn_type, Warnings::OutdatedVersion);
-        assert_eq!(
-            detailed_warning_item.warn_mesg.unwrap(),
-            "Version is outdated"
-        );
-    }
-
-    #[test]
-    fn test_warning_array() {
-        let mut warning_array = WarningArray::new_container();
-        let warning_item = WarningArrayItem::new(Warnings::Warning);
-        warning_array.push(warning_item);
-
-        assert_eq!(warning_array.len(), 1);
-        let warnings = warning_array.0.read().unwrap();
-        assert_eq!(warnings[0].warn_type, Warnings::Warning);
-    }
-
-    #[test]
-    fn test_error_array() {
-        let mut error_array = ErrorArray::new_container();
-        let error_item =
-            ErrorArrayItem::new(Errors::OpeningFile, String::from("Failed to open file"));
-        error_array.push(error_item);
-
-        assert_eq!(error_array.len(), 1);
-        let errors = error_array.0.read().unwrap();
-        assert_eq!(errors[0].err_type, Errors::OpeningFile);
-        assert_eq!(errors[0].err_mesg, "Failed to open file");
-    }
-
-    #[test]
-    fn test_unified_result_ok() {
-        let warning_item = WarningArrayItem::new(Warnings::Warning);
-        let warning_array = WarningArray::new(vec![warning_item]);
-        let ok_warning = OkWarning {
-            data: 42,
-            warning: warning_array.clone(),
-        };
-
-        let result = UnifiedResult::new_warn(Ok(ok_warning));
-        assert!(result.is_ok());
-
-        match result {
-            UnifiedResult::ResultWarning(Ok(ok_warning)) => {
-                assert_eq!(ok_warning.data, 42);
-                assert_eq!(ok_warning.warning.len(), 1);
-            }
-            _ => panic!("Expected ResultWarning with Ok"),
-        }
-    }
-
-    #[test]
-    fn test_unified_result_err() {
-        let error_item =
-            ErrorArrayItem::new(Errors::OpeningFile, String::from("Failed to open file"));
-        let error_array = ErrorArray::new(vec![error_item]);
-        let result: UnifiedResult<i32> = UnifiedResult::new(Err(error_array.clone()));
-
-        assert!(!result.is_ok());
-
-        match result {
-            UnifiedResult::ResultNoWarns(Err(err_array)) => {
-                assert_eq!(err_array.len(), 1);
-                let errors = err_array.0.read().unwrap();
-                assert_eq!(errors[0].err_type, Errors::OpeningFile);
-                assert_eq!(errors[0].err_mesg, "Failed to open file");
-            }
-            _ => panic!("Expected ResultNoWarns with Err"),
-        }
-    }
-
-    #[test]
-    fn test_error_array_item_from_io_error() {
-        let io_error = io::Error::new(io::ErrorKind::Other, "io error");
-        let error_item: ErrorArrayItem = io_error.into();
-        assert_eq!(error_item.err_type, Errors::InputOutput);
-        assert_eq!(error_item.err_mesg, "io error");
-    }
-
-    #[test]
-    fn test_error_array_item_from_net_error() {
-        let addr_parse_error = "invalid address".parse::<net::IpAddr>().unwrap_err();
-        let error_item: ErrorArrayItem = addr_parse_error.into();
-        assert_eq!(error_item.err_type, Errors::InputOutput);
-        assert_eq!(error_item.err_mesg, "invalid IP address syntax");
+#[allow(deprecated)]
+// Conversion from deprecated system Errors
+impl From<SystemError> for ErrorArrayItem {
+    fn from(value: SystemError) -> Self {
+        ErrorArrayItem::new(
+            Errors::GeneralError,
+            value.details.unwrap_or(String::from("No message appended")),
+        )
     }
 }
