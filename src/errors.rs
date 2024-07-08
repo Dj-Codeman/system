@@ -17,8 +17,8 @@ use std::{convert::Infallible, ops::FromResidual};
 // Imported for conversion to new items
 #[allow(deprecated)]
 use crate::errors_dep::SystemError;
-#[allow(deprecated)]
-use logging::errors::LoggerError;
+// #[allow(deprecated)]
+// use logging::errors::LoggerError;
 #[allow(deprecated)]
 use recs::errors::RecsError;
 
@@ -674,16 +674,16 @@ impl From<SystemError> for ErrorArrayItem {
     }
 }
 
-#[allow(deprecated)]
-// Conversion from deprecated logging errors
-impl From<LoggerError> for ErrorArrayItem {
-    fn from(value: LoggerError) -> Self {
-        ErrorArrayItem::new(
-            Errors::DEPLOGGER,
-            value.details.unwrap_or(String::from("No message appended")),
-        )
-    }
-}
+// #[allow(deprecated)]
+// // Conversion from deprecated logging errors
+// impl From<LoggerError> for ErrorArrayItem {
+//     fn from(value: LoggerError) -> Self {
+//         ErrorArrayItem::new(
+//             Errors::DEPLOGGER,
+//             value.details.unwrap_or(String::from("No message appended")),
+//         )
+//     }
+// }
 
 #[allow(deprecated)]
 // Conversion from deprecated recs Errors
