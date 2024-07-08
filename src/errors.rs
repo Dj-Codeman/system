@@ -1,3 +1,4 @@
+use block_modes::BlockModeError;
 use hex::FromHexError;
 use nix::{errno::Errno, Error};
 use pretty::{output, warn};
@@ -684,6 +685,12 @@ impl From<Infallible> for ErrorArrayItem {
 
 impl From<block_modes::InvalidKeyIvLength> for ErrorArrayItem {
     fn from(value: block_modes::InvalidKeyIvLength) -> Self {
+        ErrorArrayItem::new(Errors::GeneralError, value.to_string())
+    }
+}
+
+impl From<BlockModeError> for ErrorArrayItem {
+    fn from(value: BlockModeError) -> Self {
         ErrorArrayItem::new(Errors::GeneralError, value.to_string())
     }
 }
