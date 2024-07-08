@@ -17,6 +17,8 @@ use std::{convert::Infallible, ops::FromResidual};
 #[allow(deprecated)]
 // Imported for conversion to new items
 use crate::errors_dep::SystemError;
+use logging::errors::LoggerError;
+use recs::errors::RecsError;
 
 /// Represents different types of generic errors.
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -101,6 +103,12 @@ pub enum Errors {
     Unauthorized,
     /// Git Error.
     Git,
+    /// deprecated system errors
+    DEPSYSTEM,
+    /// deprecated logger errors
+    DEPLOGGER,
+    /// deprecated recs errors
+    DEPRECS,
 }
 
 /// Represents a generic error.
@@ -658,7 +666,29 @@ impl From<&mut ParseIntError> for ErrorArrayItem {
 impl From<SystemError> for ErrorArrayItem {
     fn from(value: SystemError) -> Self {
         ErrorArrayItem::new(
-            Errors::GeneralError,
+            Errors::DEPSYSTEM,
+            value.details.unwrap_or(String::from("No message appended")),
+        )
+    }
+}
+
+#[allow(deprecated)]
+// Conversion from deprecated logging errors
+impl From<LoggerError> for ErrorArrayItem {
+    fn from(value: LoggerError) -> Self {
+        ErrorArrayItem::new(
+            Errors::DEPLOGGER,
+            value.details.unwrap_or(String::from("No message appended")),
+        )
+    }
+}
+
+#[allow(deprecated)]
+// Conversion from deprecated recs Errors
+impl From<RecsError> for ErrorArrayItem {
+    fn from(value: RecsError) -> Self {
+        ErrorArrayItem::new(
+            Errors::DEPRECS,
             value.details.unwrap_or(String::from("No message appended")),
         )
     }
