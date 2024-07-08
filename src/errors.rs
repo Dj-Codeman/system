@@ -19,8 +19,8 @@ use std::{convert::Infallible, ops::FromResidual};
 use crate::errors_dep::SystemError;
 // #[allow(deprecated)]
 // use logging::errors::LoggerError;
-#[allow(deprecated)]
-use recs::errors::RecsError;
+// #[allow(deprecated)]
+// use recs::errors::RecsError;
 
 /// Represents different types of generic errors.
 #[derive(Debug, PartialEq, Clone, Copy)]
