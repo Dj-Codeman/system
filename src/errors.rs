@@ -2,7 +2,9 @@ use hex::FromHexError;
 use nix::errno::Errno;
 use pretty::{output, warn};
 use std::{
-    collections, fmt, io, net,
+    collections,
+    convert::Infallible,
+    fmt, io, net,
     num::ParseIntError,
     path,
     str::Utf8Error,
@@ -671,6 +673,12 @@ impl From<SystemError> for ErrorArrayItem {
             Errors::DEPSYSTEM,
             value.details.unwrap_or(String::from("No message appended")),
         )
+    }
+}
+
+impl From<Infallible> for ErrorArrayItem {
+    fn from(value: std::convert::Infallible) -> Self {
+        ErrorArrayItem::new(Errors::GeneralError, value.to_string())
     }
 }
 
