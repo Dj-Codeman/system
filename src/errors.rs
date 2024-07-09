@@ -6,7 +6,7 @@ use std::{
     collections,
     convert::Infallible,
     fmt, io, net,
-    num::ParseIntError,
+    num::{ParseIntError, TryFromIntError},
     path,
     str::Utf8Error,
     string::FromUtf8Error,
@@ -691,6 +691,12 @@ impl From<block_modes::InvalidKeyIvLength> for ErrorArrayItem {
 
 impl From<BlockModeError> for ErrorArrayItem {
     fn from(value: BlockModeError) -> Self {
+        ErrorArrayItem::new(Errors::GeneralError, value.to_string())
+    }
+}
+
+impl From<TryFromIntError> for ErrorArrayItem {
+    fn from(value: TryFromIntError) -> Self {
         ErrorArrayItem::new(Errors::GeneralError, value.to_string())
     }
 }
