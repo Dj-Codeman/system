@@ -222,9 +222,63 @@ mod tests {
 
     #[test]
     fn test_error_array_item_from_net_error() {
-        let addr_parse_error = "invalid address".parse::<net::IpAddr>().unwrap_err();
+        let addr_parse_error: AddrParseError =
+            "invalid address".parse::<net::IpAddr>().unwrap_err();
         let error_item: ErrorArrayItem = addr_parse_error.into();
         assert_eq!(error_item.err_type, Errors::InputOutput);
         assert_eq!(error_item.err_mesg, "invalid IP address syntax");
+    }
+
+    #[test]
+    fn test_pop_from_empty_array() {
+        let mut errors: ErrorArray = ErrorArray::new_container();
+        let result: ErrorArrayItem = errors.pop();
+
+        assert_eq!(result.err_type, Errors::GeneralError);
+        assert_eq!(result.err_mesg, "No previous error");
+    }
+
+    #[test]
+    fn test_pop_single_error() {
+        let mut errors: ErrorArray = ErrorArray::new_container();
+
+        let error_item: ErrorArrayItem = ErrorArrayItem::new(
+            Errors::AuthenticationError,
+            String::from("Auth error occurred"),
+        );
+        errors.push(error_item.clone());
+
+        let result: ErrorArrayItem = errors.pop();
+
+        assert_eq!(result.err_type, error_item.err_type);
+        assert_eq!(result.err_mesg, error_item.err_mesg);
+
+        // Ensure the array is empty after popping
+        let empty_result: ErrorArrayItem = errors.pop();
+        assert_eq!(empty_result.err_type, Errors::GeneralError);
+        assert_eq!(empty_result.err_mesg, "No previous error");
+    }
+
+    #[test]
+    fn test_pop_multiple_errors() {
+        let mut errors = ErrorArray::new_container();
+
+        let error_item1 = ErrorArrayItem::new(Errors::AuthenticationError, String::from("First"));
+        let error_item2 = ErrorArrayItem::new(Errors::InvalidAuthRequest, String::from("Second"));
+        errors.push(error_item1.clone());
+        errors.push(error_item2.clone());
+
+        let result2: ErrorArrayItem = errors.pop();
+        assert_eq!(result2.err_type, error_item2.err_type);
+        assert_eq!(result2.err_mesg, error_item2.err_mesg);
+
+        let result1: ErrorArrayItem = errors.pop();
+        assert_eq!(result1.err_type, error_item1.err_type);
+        assert_eq!(result1.err_mesg, error_item1.err_mesg);
+
+        // Ensure the array is empty after popping all errors
+        let empty_result: ErrorArrayItem = errors.pop();
+        assert_eq!(empty_result.err_type, Errors::GeneralError);
+        assert_eq!(empty_result.err_mesg, "No previous error");
     }
 }

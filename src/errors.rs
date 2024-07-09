@@ -283,6 +283,15 @@ impl ErrorArray {
         error_array.push(item);
     }
 
+    /// Pop the last error from the array
+    pub fn pop(&mut self) -> ErrorArrayItem {
+        let mut error_array = self.0.write().unwrap();
+        error_array.pop().unwrap_or(ErrorArrayItem::new(
+            Errors::GeneralError,
+            String::from("No previous error"),
+        ))
+    }
+
     pub fn append(&mut self, arr: Self) {
         let mut error_array = self.0.write().unwrap();
         let mut donor_array = arr.0.write().unwrap();
