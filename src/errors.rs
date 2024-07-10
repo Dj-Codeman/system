@@ -1,6 +1,6 @@
 use block_modes::BlockModeError;
 use hex::FromHexError;
-use nix::{errno::Errno, Error};
+use nix::errno::Errno;
 use pretty::{output, warn};
 use std::{
     collections,
@@ -404,7 +404,7 @@ impl fmt::Display for WarningArrayItem {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.warn_mesg {
             Some(d) => write!(f, "Warning: {:#?} - {}", self.warn_type, d),
-            None => write!(f, "Warning"),
+            None => write!(f, "Warning: {:#?}", self.warn_type),
         }
     }
 }
