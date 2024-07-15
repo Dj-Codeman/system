@@ -710,6 +710,11 @@ impl From<TryFromIntError> for ErrorArrayItem {
     }
 }
 
+impl From<nix::Error> for ErrorArrayItem {
+    fn from(value: nix::Error) -> Self {
+        ErrorArrayItem::new(Errors::GeneralError, value.to_string())
+    }
+}
 // #[allow(deprecated)]
 // // Conversion from deprecated logging errors
 // impl From<LoggerError> for ErrorArrayItem {
