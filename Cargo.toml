@@ -3,7 +3,7 @@ name = "dusa_collection_utils"
 version = "2.3.2"
 edition = "2021"
 authors = ["Darrion Whitfield <dwhitfield@ramfield.net>"]
-descriptions = "A common library with standardized functions that the ais_platform, dusa, recs and others will depend on"
+description = "A common library with standardized functions that the ais_platform, dusa, recs and others will depend on"
 license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
