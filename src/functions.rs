@@ -180,15 +180,17 @@ pub fn make_dir_perm(folder_name: &str, permissions: u32, mut errors: ErrorArray
 ///
 /// # Example
 ///
-///
+/// ```rust
 /// use std::io;
+/// use dusa_collection_utils::functions::chown_recursive;
+/// use dusa_collection_utils::types::PathType;
 ///
 /// fn main() -> Result<(), io::Error> {
-///     # Apply chown recursively to /path/to/directory with UID 1000 and GID 1000
-///     chown_recursive("/path/to/directory", Some(1000), Some(1000))?;
+///     let path = PathType::Content(String::from("/tmp/file"));
+///     chown_recursive(path, Some(1000), Some(1000)); // Apply chown recursively to /path/to/directory with UID 1000 and GID 1000
 ///     Ok(())
 /// }
-///
+///```
 pub fn chown_recursive(
     dir: PathType,
     uid: Option<u32>,
@@ -448,7 +450,7 @@ pub fn open_file(file: PathType, mut errors: ErrorArray) -> uf<File> {
 /// ```rust
 /// use std::path::PathBuf;
 /// use nix::unistd::{Uid, Gid};
-/// use system::functions::set_file_ownership;
+/// use dusa_collection_utils::functions::set_file_ownership;
 ///
 /// let path = PathBuf::from("/path/to/file");
 /// let uid = Uid::from_raw(1000); // example user ID
@@ -487,8 +489,8 @@ pub fn set_file_ownership(path: &PathBuf, uid: Uid, gid: Gid) -> Result<(), Erro
 ///
 /// ```rust
 /// use std::path::PathBuf;
-/// use system::functions::set_file_permission;
-/// use system::types::PathType;
+/// use dusa_collection_utils::functions::set_file_permission;
+/// use dusa_collection_utils::types::PathType;
 ///
 /// let socket_path = PathType::from("/path/to/socket");
 ///
