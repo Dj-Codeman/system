@@ -114,3 +114,10 @@ impl From<Box<Path>> for PathType {
         PathType::Path(path)
     }
 }
+
+impl From<&str> for PathType {
+    fn from(path: &str) -> Self {
+        let new_path: String = String::from(path);
+        PathType::Content(new_path)
+    }
+}

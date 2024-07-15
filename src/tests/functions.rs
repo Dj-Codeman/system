@@ -1,12 +1,18 @@
 #[cfg(test)]
 mod tests {
-    use std::fs::File;
+    use std::{
+        fs::{self, File},
+        os::unix::fs::{MetadataExt, PermissionsExt},
+        path::PathBuf,
+    };
+
+    use nix::unistd::{Gid, Uid};
 
     use crate::{
         errors::{ErrorArray, UnifiedResult as uf, WarningArray},
         functions::{
             create_hash, del_dir, del_file, generate_random_string, is_string_in_file, make_dir,
-            make_file, path_present, truncate,
+            make_file, path_present, set_file_ownership, set_file_permission, truncate,
         },
         types::PathType,
     };
@@ -32,6 +38,14 @@ mod tests {
         path.push_str(&name);
         path.push_str(".file");
         return PathType::Content(path);
+    }
+
+    fn create_test_file(path: &PathBuf) -> Result<(), std::io::Error> {
+        if path.exists() {
+            fs::remove_file(path)?;
+        }
+        File::create(path)?;
+        Ok(())
     }
 
     #[test]
@@ -128,5 +142,44 @@ mod tests {
             get_warnings(),
         )
         .unwrap();
+    }
+
+    #[test]
+    fn test_set_file_ownership() {
+        let path = PathBuf::from("/tmp/test_set_file_ownership");
+        create_test_file(&path).expect("Failed to create test file");
+
+        let uid = Uid::current();
+        let gid = Gid::current();
+
+        match set_file_ownership(&path, uid, gid) {
+            Ok(_) => {
+                let metadata = fs::metadata(&path).expect("Failed to get metadata");
+                let file_uid = metadata.uid();
+                let file_gid = metadata.gid();
+                assert_eq!(file_uid, uid.as_raw());
+                assert_eq!(file_gid, gid.as_raw());
+            }
+            Err(e) => panic!("Failed to set file ownership: {:?}", e),
+        }
+
+        fs::remove_file(&path).expect("Failed to remove test file");
+    }
+
+    #[test]
+    fn test_set_file_permission() {
+        let path = PathBuf::from("/tmp/test_set_file_permission");
+        create_test_file(&path).expect("Failed to create test file");
+
+        match set_file_permission(PathType::from(path.clone())) {
+            Ok(_) => {
+                let metadata = fs::metadata(&path).expect("Failed to get metadata");
+                let permissions = metadata.permissions();
+                assert_eq!(permissions.mode() & 0o777, 0o660);
+            }
+            Err(e) => panic!("Failed to set file permission: {:?}", e),
+        }
+
+        fs::remove_file(&path).expect("Failed to remove test file");
     }
 }

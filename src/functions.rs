@@ -2,6 +2,7 @@ use crate::errors::{ErrorArray, ErrorArrayItem, Errors, WarningArray, WarningArr
 use crate::{errors, types};
 use std::io::{BufRead, BufReader, Read};
 use std::os::unix::fs::{chown, MetadataExt};
+use std::path::PathBuf;
 use std::{
     fs::{self, remove_file, File},
     os::unix::prelude::PermissionsExt,
@@ -10,6 +11,7 @@ use std::{
 
 use errors::{OkWarning, UnifiedResult as uf};
 use flate2::bufread::GzDecoder;
+use nix::unistd::{Gid, Uid};
 use sha2::{Digest, Sha256};
 use tar::Archive;
 use types::{ClonePath, CopyPath, PathType};
@@ -422,6 +424,95 @@ pub fn open_file(file: PathType, mut errors: ErrorArray) -> uf<File> {
             return uf::new(Err(errors));
         }
     }
+}
+
+/// Sets the ownership of a file or directory to the specified user and group.
+///
+/// # Arguments
+///
+/// * `path` - A reference to a `PathBuf` that specifies the path to the file or directory.
+/// * `uid` - The user ID to set as the owner of the file or directory.
+/// * `gid` - The group ID to set as the group of the file or directory.
+///
+/// # Returns
+///
+/// * `Result<(), ErrorArrayItem>` - Returns `Ok(())` if the ownership was successfully set.
+///   Returns an `ErrorArrayItem` if an error occurred while setting the ownership.
+///
+/// # Errors
+///
+/// This function will return an `ErrorArrayItem` if the `chown` system call fails.
+///
+/// # Example
+///
+/// ```rust
+/// use std::path::PathBuf;
+/// use nix::unistd::{Uid, Gid};
+/// use system::functions::set_file_ownership;
+///
+/// let path = PathBuf::from("/path/to/file");
+/// let uid = Uid::from_raw(1000); // example user ID
+/// let gid = Gid::from_raw(1000); // example group ID
+///
+/// match set_file_ownership(&path, uid, gid) {
+///     Ok(_) => println!("Ownership set successfully"),
+///     Err(e) => eprintln!("Failed to set ownership: {:?}", e),
+/// }
+/// ```
+pub fn set_file_ownership(path: &PathBuf, uid: Uid, gid: Gid) -> Result<(), ErrorArrayItem> {
+    if let Err(err) = chown(path, Some(uid.into()), Some(gid.into())) {
+        return Err(ErrorArrayItem::from(err));
+    };
+
+    Ok(())
+}
+
+/// Sets the permissions of a socket file to read and write for the owner and group.
+///
+/// # Arguments
+///
+/// * `socket_path` - The path to the socket file as a `PathType`.
+///
+/// # Returns
+///
+/// * `Result<(), ErrorArrayItem>` - Returns `Ok(())` if the permissions were successfully set.
+///   Returns an `ErrorArrayItem` if an error occurred while setting the permissions.
+///
+/// # Errors
+///
+/// This function will return an `ErrorArrayItem` if the `metadata` or `set_permissions`
+/// calls from the `fs` module fail.
+///
+/// # Example
+///
+/// ```rust
+/// use std::path::PathBuf;
+/// use crate::PathType; // Assuming PathType is defined in your project
+/// use system::functions::set_file_permission;
+/// use system::types::PathType;
+///
+/// let socket_path = PathType::from("/path/to/socket");
+///
+/// match set_file_permission(socket_path) {
+///     Ok(_) => println!("Permissions set successfully"),
+///     Err(e) => eprintln!("Failed to set permissions: {:?}", e),
+/// }
+/// ```
+pub fn set_file_permission(socket_path: PathType) -> Result<(), ErrorArrayItem> {
+    // Changing the permissions of the socket
+    let socket_metadata = match fs::metadata(socket_path.clone()) {
+        Ok(d) => d,
+        Err(e) => return Err(ErrorArrayItem::from(e)),
+    };
+
+    let mut permissions = socket_metadata.permissions();
+    permissions.set_mode(0o660); // Set desired permissions
+
+    if let Err(err) = fs::set_permissions(socket_path.clone(), permissions) {
+        return Err(ErrorArrayItem::from(err));
+    }
+
+    Ok(())
 }
 
 #[cfg(rust_comp_feature = "try_trait_v2")]
