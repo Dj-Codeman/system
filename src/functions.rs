@@ -487,7 +487,6 @@ pub fn set_file_ownership(path: &PathBuf, uid: Uid, gid: Gid) -> Result<(), Erro
 ///
 /// ```rust
 /// use std::path::PathBuf;
-/// use crate::PathType; // Assuming PathType is defined in your project
 /// use system::functions::set_file_permission;
 /// use system::types::PathType;
 ///
