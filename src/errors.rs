@@ -1,7 +1,7 @@
 use block_modes::BlockModeError;
 use hex::FromHexError;
 use nix::errno::Errno;
-use pretty::{output, warn};
+use simple_pretty::{output, warn};
 use std::{
     collections,
     convert::Infallible,
