@@ -47,7 +47,7 @@ impl<T> LockWithTimeout<T> {
     ///
     /// A `Result` containing a write lock guard on success, or an error on timeout.
     pub async fn try_write_with_timeout<'a>(
-        self: &'a Arc<Self>,
+        self: &'a Self,
         timeout_time: Option<Duration>,
     ) -> Result<RwLockWriteGuard<'a, T>, ErrorArrayItem> {
         let timeout_duration: Duration = timeout_time.unwrap_or(Duration::from_secs(1));
@@ -79,7 +79,7 @@ impl<T> LockWithTimeout<T> {
     ///
     /// A `Result` containing a read lock guard on success, or an error on timeout.
     pub async fn try_read_with_timeout<'a>(
-        self: &'a Arc<Self>,
+        self: &'a Self,
         timeout_time: Option<Duration>,
     ) -> Result<RwLockReadGuard<'a, T>, ErrorArrayItem> {
         let timeout_duration: Duration = timeout_time.unwrap_or(Duration::from_secs(1));
