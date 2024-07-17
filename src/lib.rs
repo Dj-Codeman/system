@@ -6,6 +6,7 @@ pub mod errors;
 pub mod errors_dep;
 pub mod functions;
 pub mod types;
+pub mod rwarc;
 
 #[path = "tests/errors.rs"]
 pub mod errors_test;
@@ -13,3 +14,5 @@ pub mod errors_test;
 pub mod function_test;
 #[path = "tests/pathtype.rs"]
 pub mod types_test;
+#[path = "tests/rwarc.rs"]
+pub mod rwarc_test;

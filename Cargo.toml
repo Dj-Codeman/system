@@ -1,6 +1,6 @@
 [package]
 name = "dusa_collection_utils"
-version = "2.4.0"
+version = "2.5.0"
 edition = "2021"
 authors = ["Darrion Whitfield <dwhitfield@ramfield.net>"]
 description = "A common library with standardized functions that the ais_platform, dusa, recs and others will depend on"
@@ -15,6 +15,7 @@ serde = { version = "1.0.126", features = ["derive"] }
 serde_json = "1.0.64"
 sha2 = "0.10"
 flate2 = "1.0"
+tokio = { version = "1", features = ["full"] }
 tar = "0.4"
 walkdir = "2.3"
 regex = "1.10.4"

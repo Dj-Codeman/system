@@ -772,6 +772,12 @@ impl From<nix::Error> for ErrorArrayItem {
         ErrorArrayItem::new(Errors::GeneralError, value.to_string())
     }
 }
+
+impl From<tokio::sync::TryLockError> for ErrorArrayItem {
+    fn from(value: tokio::sync::TryLockError) -> Self {
+        ErrorArrayItem::new(Errors::GeneralError, value.to_string())
+    }
+}
 // #[allow(deprecated)]
 // // Conversion from deprecated logging errors
 // impl From<LoggerError> for ErrorArrayItem {
