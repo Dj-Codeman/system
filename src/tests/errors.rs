@@ -281,4 +281,17 @@ mod tests {
         assert_eq!(empty_result.err_type, Errors::GeneralError);
         assert_eq!(empty_result.err_mesg, "No previous error");
     }
+
+    #[test]
+    fn strip_warning_from_type() {
+        let mut warnings = WarningArray::new_container();
+        warnings.push(WarningArrayItem::new(Warnings::Warning));
+
+        let okwarning = OkWarning {
+            data: String::new(),
+            warning: warnings,
+        };
+
+        assert_eq!(okwarning.strip(), String::new())
+    }
 }

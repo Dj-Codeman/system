@@ -323,6 +323,35 @@ pub struct OkWarning<T> {
     pub warning: WarningArray,
 }
 
+/// returns the data within the OkWarning<T>
+/// This consumes the warning
+impl<T> OkWarning<T> {
+    /// returns the data within the OkWarning<T>
+    /// This consumes the warning
+    pub fn strip(self) -> T {
+        let ok_warning: OkWarning<T> = self;
+        ok_warning.warning.display();
+        ok_warning.data
+    }
+
+    /// new_none wraps the associated T into a OkWarning<T> and the warning field is a empty warning array container.
+    pub fn new_none(value: T) -> Self {
+        OkWarning {
+            data: value,
+            warning: WarningArray::new_container(),
+        }
+    }
+
+    /// Creates a new OkWarning from a WarningArrayItem and a value
+    pub fn new_from_item(value: T, warning: WarningArrayItem) -> Self {
+        let warning_array: WarningArray = WarningArray::new(vec![warning]);
+        Self {
+            data: value,
+            warning: warning_array,
+        }
+    }
+}
+
 impl<T> UnifiedResult<T> {
     /// Creates a new `UnifiedResult` instance with warnings.
     pub fn new_warn(result: Result<OkWarning<T>, ErrorArray>) -> Self {
@@ -358,6 +387,7 @@ impl<T> UnifiedResult<T> {
     }
 
     /// Unwraps the `UnifiedResult` and returns the data or errors.
+    /// This function will display any warnings and empty the warning array
     pub fn uf_unwrap(self) -> Result<T, ErrorArray> {
         match self {
             UnifiedResult::ResultWarning(r) => match r {
@@ -378,6 +408,33 @@ impl<T> UnifiedResult<T> {
         match &self {
             UnifiedResult::ResultWarning(d) => matches!(d, Ok(_)),
             UnifiedResult::ResultNoWarns(d) => matches!(d, Ok(_)),
+        }
+    }
+
+    /// Determines if the value in UnifiedResult is Ok()
+    pub const fn is_err(&self) -> bool {
+        match &self {
+            UnifiedResult::ResultWarning(d) => matches!(d, Err(_)),
+            UnifiedResult::ResultNoWarns(d) => matches!(d, Err(_)),
+        }
+    }
+
+    /// Gets the ok value if the operation is successful returns none otherwise
+    /// This operation will not panic. It does consume the result and displays and clears warnings if any
+    /// are present
+    pub fn get_ok(self) -> Option<T> {
+        match self.uf_unwrap() {
+            Ok(d) => Some(d),
+            Err(_) => None,
+        }
+    }
+
+    /// Similar to `get_ok()` this function will get the error value if present and return None if the operation
+    /// succeeded
+    pub fn get_err(self) -> Option<ErrorArray> {
+        match self.uf_unwrap() {
+            Ok(_) => None,
+            Err(e) => Some(e),
         }
     }
 }
