@@ -106,7 +106,7 @@ impl<T> LockWithTimeout<T> {
     /// # Returns
     ///
     /// A `Result` containing a read lock guard on success, or an error on failure.
-    pub async fn try_read<'a>(self: &'a Arc<Self>) -> Result<RwLockReadGuard<'a, T>, ErrorArrayItem> {
+    pub async fn try_read<'a>(self: &'a Self) -> Result<RwLockReadGuard<'a, T>, ErrorArrayItem> {
         match self.try_read_with_timeout(None).await {
             Ok(d) => Ok(d),
             Err(e) => Err(ErrorArrayItem::from(e)),
@@ -118,7 +118,7 @@ impl<T> LockWithTimeout<T> {
     /// # Returns
     ///
     /// A `Result` containing a write lock guard on success, or an error on failure.
-    pub async fn try_write<'a>(self: &'a Arc<Self>) -> Result<RwLockWriteGuard<'a, T>, ErrorArrayItem> {
+    pub async fn try_write<'a>(self: &'a Self) -> Result<RwLockWriteGuard<'a, T>, ErrorArrayItem> {
         match self.try_write_with_timeout(None).await {
             Ok(d) => Ok(d),
             Err(e) => Err(ErrorArrayItem::from(e)),
