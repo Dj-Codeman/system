@@ -1,5 +1,6 @@
 use crate::errors::{ErrorArray, ErrorArrayItem, Errors, WarningArray, WarningArrayItem, Warnings};
 use crate::{errors, types};
+use std::fs::OpenOptions;
 use std::io::{BufRead, BufReader, Read};
 use std::os::unix::fs::{chown, MetadataExt};
 use std::path::PathBuf;
@@ -65,13 +66,16 @@ pub fn generate_random_string(length: usize, mut errors: ErrorArray) -> uf<Strin
 ///
 /// Returns `Ok(true)` if the target string is found, otherwise `Ok(false)`.
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
-#[allow(deprecated)]
 pub fn is_string_in_file(
     file_path: &PathType,
     target_string: &str,
     mut errors: ErrorArray,
 ) -> uf<bool> {
-    let file: File = open_file(file_path.clone_path(), errors.clone()).unwrap();
+    let file = if let Ok(data) = open_file(file_path.clone_path(), false) {
+        data
+    } else {
+        return uf::new(Ok(false));
+    };
 
     let reader = BufReader::new(file);
 
@@ -392,7 +396,14 @@ pub fn del_file(path: PathType, mut errors: ErrorArray, mut warnings: WarningArr
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
 #[allow(deprecated)]
 pub fn untar(file_path: &PathType, output_folder: &str, mut errors: ErrorArray) -> uf<()> {
-    let tar_file: File = open_file(file_path.clone_path(), errors.clone()).unwrap();
+    let tar_file: File = match open_file(file_path.clone_path(), false) {
+        Ok(d) => d,
+        Err(e) => {
+            errors.push(e);
+            return uf::new(Err(errors));
+        }
+    };
+
     let tar_reader: BufReader<File> = BufReader::new(tar_file);
     let tar: GzDecoder<BufReader<File>> = GzDecoder::new(tar_reader);
     let mut archive: Archive<GzDecoder<BufReader<File>>> = Archive::new(tar);
@@ -415,17 +426,18 @@ pub fn untar(file_path: &PathType, output_folder: &str, mut errors: ErrorArray) 
 /// # Returns
 /// Returns `Ok(file)` if the file exists and can be opened.
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
-#[deprecated(since = "2.2.6", note = "No alternative")]
-pub fn open_file(file: PathType, mut errors: ErrorArray) -> uf<File> {
-    let file_raw = File::open(file.to_path_buf()).map_err(|err| ErrorArrayItem::from(err));
+pub fn open_file(file: PathType, create: bool) -> Result<File, ErrorArrayItem> {
+    let file_path = file.canonicalize().map_err(|err| ErrorArrayItem::from(err));
 
-    match file_raw {
-        Ok(d) => return uf::new(Ok(d)),
-        Err(e) => {
-            errors.push(e);
-            return uf::new(Err(errors));
-        }
-    }
+    let file_result = OpenOptions::new()
+        .read(true) // Open file with read
+        .write(true) // Open file with write
+        .append(true)
+        .create(create)
+        .open(file_path?)
+        .map_err(|err| ErrorArrayItem::from(err));
+
+    return file_result;
 }
 
 /// Sets the ownership of a file or directory to the specified user and group.

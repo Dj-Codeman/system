@@ -1,8 +1,10 @@
 {
     "cSpell.words": [
+        "canonicalize",
         "DEPLOGGER",
         "DEPRECS",
         "DEPSYSTEM",
+        "hasher",
         "mesg",
         "rustversion"
     ]

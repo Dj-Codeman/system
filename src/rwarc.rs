@@ -65,7 +65,10 @@ impl<T> LockWithTimeout<T> {
         .await
         {
             Ok(result) => result,
-            Err(_) => Err(ErrorArrayItem::new(Errors::GeneralError, String::from("Timeout while trying to acquire write lock")))
+            Err(_) => Err(ErrorArrayItem::new(
+                Errors::GeneralError,
+                String::from("Timeout while trying to acquire write lock"),
+            )),
         }
     }
 
@@ -97,7 +100,10 @@ impl<T> LockWithTimeout<T> {
         .await
         {
             Ok(result) => result,
-            Err(_) => Err(ErrorArrayItem::new(Errors::GeneralError, String::from("Timeout while trying to acquire read lock")))
+            Err(_) => Err(ErrorArrayItem::new(
+                Errors::GeneralError,
+                String::from("Timeout while trying to acquire read lock"),
+            )),
         }
     }
 
@@ -110,7 +116,7 @@ impl<T> LockWithTimeout<T> {
         match self.try_read_with_timeout(None).await {
             Ok(d) => Ok(d),
             Err(e) => Err(ErrorArrayItem::from(e)),
-        }   
+        }
     }
 
     /// Attempts to acquire a write lock on the shared state.
@@ -122,6 +128,6 @@ impl<T> LockWithTimeout<T> {
         match self.try_write_with_timeout(None).await {
             Ok(d) => Ok(d),
             Err(e) => Err(ErrorArrayItem::from(e)),
-        }   
+        }
     }
 }
