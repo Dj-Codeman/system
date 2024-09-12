@@ -6,6 +6,8 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
+use crate::stringy::Stringy;
+
 /// Represents different types of paths.
 ///
 /// This enum can hold various types of paths:
@@ -24,6 +26,8 @@ pub enum PathType {
     Str(Box<str>),
     /// Represents a path as a string content.
     Content(String),
+    /// Represents a path as a stringy
+    Stringy(Stringy),
 }
 
 /// A trait for types that can be converted into a `PathBuf`.
@@ -46,6 +50,7 @@ impl ClonePath for PathType {
             PathType::Path(d) => PathType::Path(d.clone()),
             PathType::Str(d) => PathType::Str(d.clone()),
             PathType::Content(d) => PathType::Content(d.clone()),
+            PathType::Stringy(d) => PathType::Stringy(d.clone()),
         }
     }
 }
@@ -58,6 +63,7 @@ impl CopyPath for PathType {
             PathType::Path(path) => path.as_ref().to_path_buf(),
             PathType::Str(str_box) => PathBuf::from(&**str_box),
             PathType::Content(content) => PathBuf::from(content),
+            PathType::Stringy(stringy) => PathBuf::from(stringy.to_string()),
         }
     }
 }
@@ -76,6 +82,7 @@ impl fmt::Display for PathType {
             PathType::Path(path) => write!(f, "{}", path.display()),
             PathType::Str(str_box) => write!(f, "{}", str_box),
             PathType::Content(content) => write!(f, "{}", content),
+            PathType::Stringy(stringy) => write!(f, "{}", stringy),
         }
     }
 }
@@ -89,6 +96,7 @@ impl Deref for PathType {
             PathType::Path(path) => path.as_ref(),
             PathType::Str(str_box) => Path::new(&**str_box),
             PathType::Content(content) => Path::new(content),
+            PathType::Stringy(stringy) => Path::new(&*stringy),
         }
     }
 }

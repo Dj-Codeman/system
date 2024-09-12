@@ -1,4 +1,4 @@
-use std::{fmt, sync::Arc};
+use std::{ffi::OsStr, fmt, ops::Deref, sync::Arc};
 
 use serde::{Deserialize, Serialize};
 
@@ -51,6 +51,27 @@ impl Stringy {
         match self {
             Stringy::Immutable(arc_str) => Arc::clone(arc_str),
             Stringy::Mutable(s) => Arc::from(s.as_str()),
+        }
+    }
+}
+
+impl Deref for Stringy {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            Stringy::Immutable(arc_str) => arc_str.deref(),
+            Stringy::Mutable(s) => s.deref(),
+        }
+    }
+}
+
+// Implement AsRef<OsStr> for `Stringy`
+impl AsRef<OsStr> for Stringy {
+    fn as_ref(&self) -> &OsStr {
+        match self {
+            Stringy::Immutable(arc_str) => OsStr::new(&**arc_str),
+            Stringy::Mutable(s) => OsStr::new(s),
         }
     }
 }
