@@ -84,3 +84,21 @@ impl<'de> Deserialize<'de> for Stringy {
         Ok(Stringy::Immutable(Arc::from(s)))
     }
 }
+
+impl From<String> for Stringy {
+    fn from(s: String) -> Self {
+        Self::Immutable(Arc::from(s.as_str()))
+    }
+}
+
+impl From<&str> for Stringy {
+    fn from(s: &str) -> Self {
+        Self::Immutable(Arc::from(s))
+    }
+}
+
+impl From<&String> for Stringy {
+    fn from(s: &String) -> Self {
+        Self::Immutable(Arc::from(s.as_str()))
+    }
+}
