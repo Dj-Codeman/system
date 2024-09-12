@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{fmt, sync::Arc};
 
 use serde::{Deserialize, Serialize};
 
@@ -82,6 +82,15 @@ impl<'de> Deserialize<'de> for Stringy {
     {
         let s = String::deserialize(deserializer)?;
         Ok(Stringy::Immutable(Arc::from(s)))
+    }
+}
+
+impl fmt::Display for Stringy {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Stringy::Immutable(arc_str) => write!(f, "{}", arc_str),
+            Stringy::Mutable(ref string) => write!(f, "{}", string),
+        }
     }
 }
 
