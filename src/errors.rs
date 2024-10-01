@@ -1,6 +1,7 @@
 use block_modes::BlockModeError;
 use hex::FromHexError;
 use nix::errno::Errno;
+use serde::{Deserialize, Serialize};
 use simple_pretty::{output, warn};
 use std::{
     collections,
@@ -26,7 +27,7 @@ use crate::errors_dep::SystemError;
 // use recs::errors::RecsError;
 
 /// Represents different types of generic errors.
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub enum Errors {
     /// Error encountered while opening a file.
     OpeningFile,
@@ -117,7 +118,7 @@ pub enum Errors {
 }
 
 /// Represents a generic error.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ErrorArrayItem {
     /// Type of the error.
     pub err_type: Errors,
