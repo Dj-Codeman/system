@@ -27,7 +27,7 @@ use crate::errors_dep::SystemError;
 // use recs::errors::RecsError;
 
 /// Represents different types of generic errors.
-#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize, Eq, PartialOrd, Ord)]
 pub enum Errors {
     /// Error encountered while opening a file.
     OpeningFile,
@@ -118,7 +118,7 @@ pub enum Errors {
 }
 
 /// Represents a generic error.
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, PartialOrd, Ord, Eq)]
 pub struct ErrorArrayItem {
     /// Type of the error.
     pub err_type: Errors,
