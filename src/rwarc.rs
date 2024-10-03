@@ -33,8 +33,10 @@ impl<T> LockWithTimeout<T> {
     /// # Returns
     ///
     /// A clone of the `Arc<LockWithTimeout<T>>`.
-    pub fn clone(self: &Arc<Self>) -> Arc<Self> {
-        Arc::clone(self)
+    pub fn clone(&self) -> Self {
+        LockWithTimeout {
+            state: Arc::clone(&self.state),
+        }
     }
 
     /// Attempts to acquire a write lock on the shared state with a timeout.
