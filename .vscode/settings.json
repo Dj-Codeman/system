@@ -6,6 +6,7 @@
         "DEPSYSTEM",
         "hasher",
         "mesg",
-        "rustversion"
+        "rustversion",
+        "rwarc"
     ]
 }
