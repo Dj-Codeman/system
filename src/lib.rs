@@ -9,6 +9,7 @@ pub mod log;
 pub mod rwarc;
 pub mod stringy;
 pub mod types;
+pub mod version;
 
 #[path = "tests/errors.rs"]
 pub mod errors_test;
@@ -20,3 +21,5 @@ pub mod rwarc_test;
 pub mod stringy_test;
 #[path = "tests/pathtype.rs"]
 pub mod types_test;
+#[path = "tests/version.rs"]
+pub mod version_test;
