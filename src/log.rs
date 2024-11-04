@@ -20,7 +20,7 @@ pub enum LogLevel {
 macro_rules! log {
     ($level:expr, $($arg:tt)*) => {
         {
-            let current_level = $crate::logger::get_log_level();
+            let current_level = $crate::log::get_log_level();
             if $level <= current_level {
                 println!("[{}]: {}", $level, format!($($arg)*));
             }
