@@ -9,7 +9,7 @@ mod tests {
     use nix::unistd::{Gid, Uid};
 
     use crate::{
-        errors::{ErrorArray, UnifiedResult as uf, WarningArray},
+        errors::{UnifiedResult as uf, WarningArray},
         functions::{
             create_hash, del_dir, del_file, generate_random_string, is_string_in_file, make_dir,
             make_file, path_present, set_file_ownership, set_file_permission, truncate,
@@ -19,11 +19,7 @@ mod tests {
 
     const TARGET_STRING: &str = "Line 2";
 
-    fn get_errors() -> ErrorArray {
-        ErrorArray::new_container()
-    }
-
-    fn get_warnings() -> WarningArray {
+    fn _get_warnings() -> WarningArray {
         WarningArray::new_container()
     }
 
@@ -50,7 +46,7 @@ mod tests {
 
     #[test]
     fn random_string() {
-        let test_string: String = generate_random_string(10, get_errors()).unwrap();
+        let test_string: String = generate_random_string(10).unwrap();
         assert_eq!(test_string.len(), 10);
     }
 
@@ -62,7 +58,7 @@ mod tests {
 
     #[test]
     fn path_present_test() {
-        let result: uf<bool> = path_present(&get_file(), get_errors());
+        let result: uf<bool> = path_present(&get_file());
         assert_eq!(result.is_ok(), true)
     }
 
@@ -77,28 +73,28 @@ mod tests {
 
     #[test]
     fn create_dir() {
-        let _ = del_dir(&&get_dir(), get_errors()).unwrap();
-        let _ = make_dir(&get_dir(), get_errors()).unwrap();
-        assert_eq!(path_present(&get_dir(), get_errors()).unwrap(), true);
+        let _ = del_dir(&&get_dir()).unwrap();
+        let _ = make_dir(&get_dir()).unwrap();
+        assert_eq!(path_present(&get_dir()).unwrap(), true);
     }
 
     #[test]
     fn delete_dir() {
-        make_dir(&get_dir(), get_errors()).unwrap();
-        del_dir(&get_dir(), get_errors()).unwrap();
-        assert_eq!(path_present(&get_dir(), get_errors()).unwrap(), false);
+        make_dir(&get_dir()).unwrap();
+        del_dir(&get_dir()).unwrap();
+        assert_eq!(path_present(&get_dir()).unwrap(), false);
     }
 
     #[test]
     fn create_file() {
-        assert_eq!(make_file(get_file(), get_errors()).is_ok(), true);
+        assert_eq!(make_file(get_file()).is_ok(), true);
     }
 
     #[test]
     fn delete_file() {
-        let _ = make_file(get_file(), get_errors());
-        let _ = del_file(get_file(), get_errors(), get_warnings());
-        assert_eq!(path_present(&get_file(), get_errors()).unwrap(), false);
+        let _ = make_file(get_file());
+        let _ = del_file(get_file());
+        assert_eq!(path_present(&get_file()).unwrap(), false);
     }
 
     #[test]
@@ -114,12 +110,7 @@ mod tests {
         // Test with a string that exists in the file
         let path_buf = PathType::Str(tmp_file_path.into());
         assert_eq!(
-            is_string_in_file(
-                &PathType::PathBuf(path_buf.to_path_buf()),
-                TARGET_STRING,
-                get_errors()
-            )
-            .unwrap(),
+            is_string_in_file(&PathType::PathBuf(path_buf.to_path_buf()), TARGET_STRING,).unwrap(),
             true
         );
 
@@ -129,19 +120,13 @@ mod tests {
             is_string_in_file(
                 &PathType::PathBuf(path_buf.to_path_buf()),
                 non_existing_target,
-                get_errors()
             )
             .unwrap(),
             false
         );
 
         // Clean up the temporary file
-        del_file(
-            PathType::Str(tmp_file_path.into()),
-            get_errors(),
-            get_warnings(),
-        )
-        .unwrap();
+        del_file(PathType::Str(tmp_file_path.into())).unwrap();
     }
 
     #[test]
@@ -152,7 +137,7 @@ mod tests {
         let uid = Uid::current();
         let gid = Gid::current();
 
-        match set_file_ownership(&path, uid, gid) {
+        match set_file_ownership(&path, uid, gid).uf_unwrap() {
             Ok(_) => {
                 let metadata = fs::metadata(&path).expect("Failed to get metadata");
                 let file_uid = metadata.uid();
@@ -171,7 +156,7 @@ mod tests {
         let path = PathBuf::from("/tmp/test_set_file_permission");
         create_test_file(&path).expect("Failed to create test file");
 
-        match set_file_permission(PathType::from(path.clone())) {
+        match set_file_permission(PathType::from(path.clone())).uf_unwrap() {
             Ok(_) => {
                 let metadata = fs::metadata(&path).expect("Failed to get metadata");
                 let permissions = metadata.permissions();

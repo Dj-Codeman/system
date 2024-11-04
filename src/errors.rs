@@ -310,9 +310,9 @@ impl ErrorArray {
 #[derive(Debug)]
 pub enum UnifiedResult<T> {
     /// Result variant containing data and warnings.
-    ResultWarning(Result<OkWarning<T>, ErrorArray>),
+    ResultWarning(Result<OkWarning<T>, ErrorArrayItem>),
     /// Result variant containing data only.
-    ResultNoWarns(Result<T, ErrorArray>),
+    ResultNoWarns(Result<T, ErrorArrayItem>),
 }
 
 /// Represents a result that contains data and warnings.
@@ -355,12 +355,12 @@ impl<T> OkWarning<T> {
 
 impl<T> UnifiedResult<T> {
     /// Creates a new `UnifiedResult` instance with warnings.
-    pub fn new_warn(result: Result<OkWarning<T>, ErrorArray>) -> Self {
+    pub fn new_warn(result: Result<OkWarning<T>, ErrorArrayItem>) -> Self {
         UnifiedResult::ResultWarning(result)
     }
 
     /// Creates a new `UnifiedResult` instance without warnings.
-    pub fn new(result: Result<T, ErrorArray>) -> Self {
+    pub fn new(result: Result<T, ErrorArrayItem>) -> Self {
         UnifiedResult::ResultNoWarns(result)
     }
 
@@ -373,14 +373,14 @@ impl<T> UnifiedResult<T> {
                     return d.data;
                 }
                 Err(e) => {
-                    e.display(true);
+                    ErrorArray::new(vec![e]).display(true);
                     unreachable!()
                 }
             },
             UnifiedResult::ResultNoWarns(r) => match r {
                 Ok(d) => return d,
                 Err(e) => {
-                    e.display(true);
+                    ErrorArray::new(vec![e]).display(true);
                     unreachable!()
                 }
             },
@@ -389,7 +389,7 @@ impl<T> UnifiedResult<T> {
 
     /// Unwraps the `UnifiedResult` and returns the data or errors.
     /// This function will display any warnings and empty the warning array
-    pub fn uf_unwrap(self) -> Result<T, ErrorArray> {
+    pub fn uf_unwrap(self) -> Result<T, ErrorArrayItem> {
         match self {
             UnifiedResult::ResultWarning(r) => match r {
                 Ok(d) => {
@@ -432,7 +432,7 @@ impl<T> UnifiedResult<T> {
 
     /// Similar to `get_ok()` this function will get the error value if present and return None if the operation
     /// succeeded
-    pub fn get_err(self) -> Option<ErrorArray> {
+    pub fn get_err(self) -> Option<ErrorArrayItem> {
         match self.uf_unwrap() {
             Ok(_) => None,
             Err(e) => Some(e),

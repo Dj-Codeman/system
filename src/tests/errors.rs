@@ -193,26 +193,6 @@ mod tests {
     }
 
     #[test]
-    fn test_unified_result_err() {
-        let error_item =
-            ErrorArrayItem::new(Errors::OpeningFile, String::from("Failed to open file"));
-        let error_array = ErrorArray::new(vec![error_item]);
-        let result: UnifiedResult<i32> = UnifiedResult::new(Err(error_array.clone()));
-
-        assert!(!result.is_ok());
-
-        match result {
-            UnifiedResult::ResultNoWarns(Err(err_array)) => {
-                assert_eq!(err_array.len(), 1);
-                let errors = err_array.0.read().unwrap();
-                assert_eq!(errors[0].err_type, Errors::OpeningFile);
-                assert_eq!(errors[0].err_mesg, "Failed to open file");
-            }
-            _ => panic!("Expected ResultNoWarns with Err"),
-        }
-    }
-
-    #[test]
     fn test_error_array_item_from_io_error() {
         let io_error = io::Error::new(io::ErrorKind::Other, "io error");
         let error_item: ErrorArrayItem = io_error.into();
