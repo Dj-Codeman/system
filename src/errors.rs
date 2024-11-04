@@ -2,7 +2,6 @@ use block_modes::BlockModeError;
 use hex::FromHexError;
 use nix::errno::Errno;
 use serde::{Deserialize, Serialize};
-use simple_pretty::{output, warn};
 use std::{
     collections,
     convert::Infallible,
@@ -21,6 +20,7 @@ use std::{convert::Infallible, ops::FromResidual};
 // Imported for conversion to new items
 #[allow(deprecated)]
 use crate::errors_dep::SystemError;
+use crate::{log, log::LogLevel};
 // #[allow(deprecated)]
 // use logging::errors::LoggerError;
 // #[allow(deprecated)]
@@ -218,7 +218,7 @@ impl WarningArray {
     pub fn display(self) {
         let mut warning_array = self.0.write().unwrap();
         for warns in warning_array.as_slice() {
-            warn(&format!("{}", warns))
+            log!(LogLevel::Warn, "{}", warns)
         }
         warning_array.clear()
     }
@@ -269,7 +269,7 @@ impl ErrorArray {
     pub fn display(self, die: bool) {
         let mut error_array = self.0.write().unwrap();
         for errors in error_array.as_slice() {
-            output("RED", &format!("{}", errors))
+            log!(LogLevel::Error, "{}", errors);
         }
         if die {
             std::process::exit(1);
