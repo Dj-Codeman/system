@@ -97,6 +97,10 @@ pub enum Errors {
     PermissionDenied,
     /// Resource not found.
     NotFound,
+    /// Network Error
+    Network,
+    /// Protocol Error
+    Protocol,
     /// Out of memory.
     OutOfMemory,
     /// Connection error.
