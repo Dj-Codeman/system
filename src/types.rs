@@ -5,8 +5,8 @@ use std::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    errors::ErrorArrayItem,
-    stringy::Stringy,
+    errors::ErrorArrayItem, log::LogLevel, stringy::Stringy, log,
+    
 };
 
 /// Represents different types of paths.
@@ -77,12 +77,21 @@ impl PathType {
 
     /// Attempts to delete the file or directory
     pub fn delete(&self) -> Result<(), ErrorArrayItem> {
-        if self.is_dir() {
-            fs::remove_dir_all(&self).map_err(ErrorArrayItem::from)
-        } else if self.is_file() || self.is_symlink() {
-            fs::remove_file(&self).map_err(ErrorArrayItem::from)
-        } else {
-            Ok(())
+        match self.exists() {
+            true => {
+                if self.is_dir() {
+                    fs::remove_dir_all(&self).map_err(ErrorArrayItem::from)
+                } else if self.is_file() || self.is_symlink() {
+                    fs::remove_file(&self).map_err(ErrorArrayItem::from)
+                } else {
+                    Ok(())
+                }
+        
+            },
+            false => {
+                log!(LogLevel::Warn, "{}, Doesn't exist", self.to_string());
+                return Ok(())
+            },
         }
     }
 
