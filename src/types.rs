@@ -1,14 +1,11 @@
 use std::{
-    fmt,
-    ops::Deref,
-    path::{Path, PathBuf},
+    fmt, fs, ops::Deref, path::{Path, PathBuf}
 };
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
     errors::ErrorArrayItem,
-    functions::{del_dir, del_file},
     stringy::Stringy,
 };
 
@@ -78,16 +75,17 @@ impl PathType {
         self.copy_path()
     }
 
-    /// Attempts to delete the file
+    /// Attempts to delete the file or directory
     pub fn delete(&self) -> Result<(), ErrorArrayItem> {
         if self.is_dir() {
-            return del_dir(&self).uf_unwrap();
+            fs::remove_dir_all(&self).map_err(ErrorArrayItem::from)
+        } else if self.is_file() || self.is_symlink() {
+            fs::remove_file(&self).map_err(ErrorArrayItem::from)
+        } else {
+            Ok(())
         }
-        if self.is_file() {
-            return del_file(&self).uf_unwrap();
-        }
-        unreachable!()
     }
+
 }
 
 impl fmt::Display for PathType {
