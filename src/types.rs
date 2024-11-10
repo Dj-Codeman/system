@@ -6,7 +6,11 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::stringy::Stringy;
+use crate::{
+    errors::ErrorArrayItem,
+    functions::{del_dir, del_file},
+    stringy::Stringy,
+};
 
 /// Represents different types of paths.
 ///
@@ -72,6 +76,17 @@ impl PathType {
     /// Converts the `PathType` into a `PathBuf`.
     pub fn to_path_buf(&self) -> PathBuf {
         self.copy_path()
+    }
+
+    /// Attempts to delete the file
+    pub fn delete(&self) -> Result<(), ErrorArrayItem> {
+        if self.is_dir() {
+            return del_dir(&self).uf_unwrap();
+        }
+        if self.is_file() {
+            return del_file(&self).uf_unwrap();
+        }
+        unreachable!()
     }
 }
 

@@ -349,7 +349,7 @@ pub fn del_dir(file: &PathType) -> uf<()> {
 ///
 /// Returns `Ok(())` if the file is deleted successfully or if it does not exist.
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
-pub fn del_file(file: PathType) -> uf<()> {
+pub fn del_file(file: &PathType) -> uf<()> {
     match file.exists() {
         true => match remove_file(file) {
             Ok(_) => return uf::new(Ok(())),

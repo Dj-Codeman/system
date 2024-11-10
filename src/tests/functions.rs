@@ -93,7 +93,7 @@ mod tests {
     #[test]
     fn delete_file() {
         let _ = make_file(get_file());
-        let _ = del_file(get_file());
+        let _ = del_file(&get_file());
         assert_eq!(path_present(&get_file()).unwrap(), false);
     }
 
@@ -126,7 +126,7 @@ mod tests {
         );
 
         // Clean up the temporary file
-        del_file(PathType::Str(tmp_file_path.into())).unwrap();
+        del_file(&PathType::Str(tmp_file_path.into())).unwrap();
     }
 
     #[test]
