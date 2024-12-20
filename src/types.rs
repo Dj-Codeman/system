@@ -5,8 +5,14 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
+use tempfile::{tempdir /*tempfile*/};
 
-use crate::{errors::ErrorArrayItem, log, log::LogLevel, stringy::Stringy};
+use crate::{
+    errors::{ErrorArrayItem, Errors},
+    log,
+    log::LogLevel,
+    stringy::Stringy,
+};
 
 /// Represents different types of paths.
 ///
@@ -74,6 +80,11 @@ impl PathType {
         self.copy_path()
     }
 
+    /// Converts the `PathType` into a `Path`.
+    pub fn to_path(&self) -> Box<Path> {
+        self.copy_path().as_path().into()
+    }
+
     /// Attempts to delete the file or directory
     pub fn delete(&self) -> Result<(), ErrorArrayItem> {
         match self.exists() {
@@ -92,6 +103,29 @@ impl PathType {
             }
         }
     }
+
+    pub fn temp_dir() -> Result<Self, ErrorArrayItem> {
+        if let Ok(dir) = tempdir() {
+            let path = dir.into_path();
+            Ok(PathType::PathBuf(path))
+        } else {
+            Err(ErrorArrayItem::new(
+                Errors::CreatingDirectory,
+                "Failed to create a temp dir",
+            ))
+        }
+    }
+
+    // pub fn temp_file() -> Result<Self, ErrorArrayItem> {
+    //     if let Ok(file) = tempfile() {
+    //         let file_meta = file.metadata().map_err(ErrorArrayItem::from)?;
+    //         let path = P
+
+    //         Ok(PathType::PathBuf(path))
+    //     } else {
+    //         Err(ErrorArrayItem::new(Errors::CreatingDirectory, "Failed to create a temp dir"))
+    //     }
+    // }
 }
 
 impl fmt::Display for PathType {
@@ -133,6 +167,12 @@ where
 impl From<PathBuf> for PathType {
     fn from(path_buf: PathBuf) -> Self {
         PathType::PathBuf(path_buf)
+    }
+}
+
+impl From<&PathBuf> for PathType {
+    fn from(path_buf: &PathBuf) -> Self {
+        PathType::PathBuf(path_buf.clone())
     }
 }
 
