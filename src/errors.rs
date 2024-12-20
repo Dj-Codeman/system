@@ -196,7 +196,6 @@ pub enum Errors {
     DEPRECS,
 }
 
-
 /// Represents a generic error.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, PartialOrd, Ord, Eq)]
 pub struct ErrorArrayItem {

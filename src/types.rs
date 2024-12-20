@@ -1,13 +1,12 @@
 use std::{
-    fmt, fs, ops::Deref, path::{Path, PathBuf}
+    fmt, fs,
+    ops::Deref,
+    path::{Path, PathBuf},
 };
 
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    errors::ErrorArrayItem, log::LogLevel, stringy::Stringy, log,
-    
-};
+use crate::{errors::ErrorArrayItem, log, log::LogLevel, stringy::Stringy};
 
 /// Represents different types of paths.
 ///
@@ -86,15 +85,13 @@ impl PathType {
                 } else {
                     Ok(())
                 }
-        
-            },
+            }
             false => {
                 log!(LogLevel::Warn, "{}, Doesn't exist", self.to_string());
-                return Ok(())
-            },
+                return Ok(());
+            }
         }
     }
-
 }
 
 impl fmt::Display for PathType {
