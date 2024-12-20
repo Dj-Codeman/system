@@ -420,6 +420,42 @@ pub fn untar(file_path: &PathType, output_folder: &PathType) -> uf<()> {
     }
 }
 
+/// Creates a tar.gz file from the specified input folder and saves it to the given file path.
+///
+/// # Arguments
+///
+/// * `input_folder` - The path of the folder whose contents will be archived.
+/// * `output_file_path` - The path where the tar.gz file will be created.
+///
+/// # Returns
+///
+/// Returns `Ok(())` if the creation is successful.
+/// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
+pub fn tar(input_folder: &PathType, output_file_path: &PathType) -> uf<()> {
+    let output_file = match OpenOptions::new()
+        .write(true)
+        .create(true) // Create the file if it doesn't exist
+        .truncate(true) // Truncate the file if it exists
+        .open(output_file_path.clone_path())
+    {
+        Ok(file) => file,
+        Err(e) => {
+            return uf::new(Err(e.into()));
+        }
+    };
+
+    let output_writer: BufWriter<File> = BufWriter::new(output_file);
+    let encoder: GzEncoder<BufWriter<File>> = GzEncoder::new(output_writer, Compression::default());
+    let mut tar_builder: Builder<GzEncoder<BufWriter<File>>> = Builder::new(encoder);
+
+    match tar_builder.append_dir_all(".", input_folder.clone_path()) {
+        Ok(_) => uf::new(Ok(())),
+        Err(e) => {
+            return uf::new(Err(ErrorArrayItem::from(e)));
+        }
+    }
+}
+
 /// Opens a file.
 ///
 /// # Arguments
