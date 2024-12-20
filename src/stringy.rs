@@ -53,6 +53,14 @@ impl Stringy {
             Stringy::Mutable(s) => Arc::from(s.as_str()),
         }
     }
+
+    /// Gets a &str from a given stringy
+    pub fn as_str(&self) -> &str {
+        match &self {
+            Stringy::Immutable(data) => Arc::deref(&data),
+            Stringy::Mutable(data) => data.as_str(),
+        }
+    }
 }
 
 impl Deref for Stringy {

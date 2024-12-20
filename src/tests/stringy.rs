@@ -115,4 +115,12 @@ mod tests {
             panic!("Expected Mutable variant after mutation.");
         }
     }
+
+    #[test]
+    fn test_as_str_return_correct_type() {
+        let original: &str = "Value";
+        let stringy = Stringy::new(original);
+
+        assert_eq!(stringy.as_str(), original)
+    }
 }
