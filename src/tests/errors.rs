@@ -21,7 +21,7 @@ mod tests {
         let error_item =
             ErrorArrayItem::new(Errors::OpeningFile, String::from("Failed to open file"));
         assert_eq!(error_item.err_type, Errors::OpeningFile);
-        assert_eq!(error_item.err_mesg, "Failed to open file");
+        assert_eq!(error_item.err_mesg, "Failed to open file".into());
     }
 
     #[test]
@@ -84,13 +84,13 @@ mod tests {
         let io_error = io::Error::new(io::ErrorKind::Other, "I/O error");
         let error_item: ErrorArrayItem = io_error.into();
         assert_eq!(error_item.err_type, Errors::InputOutput);
-        assert_eq!(error_item.err_mesg, "I/O error");
+        assert_eq!(error_item.err_mesg, "I/O error".into());
 
         // Converting net::AddrParseError
         let addr_error: AddrParseError = "invalid address".parse::<net::IpAddr>().unwrap_err();
         let error_item: ErrorArrayItem = addr_error.into();
         assert_eq!(error_item.err_type, Errors::InputOutput);
-        assert_eq!(error_item.err_mesg, "invalid IP address syntax");
+        assert_eq!(error_item.err_mesg, "invalid IP address syntax".into());
 
         // Converting mpsc::SendError
         let (sender, receiver) = mpsc::channel::<i32>();
@@ -98,7 +98,7 @@ mod tests {
         let send_error: mpsc::SendError<i32> = sender.send(1).unwrap_err();
         let error_item: ErrorArrayItem = send_error.into();
         assert_eq!(error_item.err_type, Errors::InputOutput);
-        assert_eq!(error_item.err_mesg, "sending on a closed channel");
+        assert_eq!(error_item.err_mesg, "sending on a closed channel".into());
 
         // // Converting SystemTimeError
         // let system_time_error: SystemTime = SystemTime::now() - SystemTime::UNIX_EPOCH;
@@ -168,7 +168,7 @@ mod tests {
         assert_eq!(error_array.len(), 1);
         let errors = error_array.0.read().unwrap();
         assert_eq!(errors[0].err_type, Errors::OpeningFile);
-        assert_eq!(errors[0].err_mesg, "Failed to open file");
+        assert_eq!(errors[0].err_mesg, "Failed to open file".into());
     }
 
     #[test]
@@ -197,7 +197,7 @@ mod tests {
         let io_error = io::Error::new(io::ErrorKind::Other, "io error");
         let error_item: ErrorArrayItem = io_error.into();
         assert_eq!(error_item.err_type, Errors::InputOutput);
-        assert_eq!(error_item.err_mesg, "io error");
+        assert_eq!(error_item.err_mesg, "io error".into());
     }
 
     #[test]
@@ -206,7 +206,7 @@ mod tests {
             "invalid address".parse::<net::IpAddr>().unwrap_err();
         let error_item: ErrorArrayItem = addr_parse_error.into();
         assert_eq!(error_item.err_type, Errors::InputOutput);
-        assert_eq!(error_item.err_mesg, "invalid IP address syntax");
+        assert_eq!(error_item.err_mesg, "invalid IP address syntax".into());
     }
 
     #[test]
@@ -215,7 +215,7 @@ mod tests {
         let result: ErrorArrayItem = errors.pop();
 
         assert_eq!(result.err_type, Errors::GeneralError);
-        assert_eq!(result.err_mesg, "No previous error");
+        assert_eq!(result.err_mesg, "No previous error".into());
     }
 
     #[test]
@@ -236,7 +236,7 @@ mod tests {
         // Ensure the array is empty after popping
         let empty_result: ErrorArrayItem = errors.pop();
         assert_eq!(empty_result.err_type, Errors::GeneralError);
-        assert_eq!(empty_result.err_mesg, "No previous error");
+        assert_eq!(empty_result.err_mesg, "No previous error".into());
     }
 
     #[test]
@@ -259,7 +259,7 @@ mod tests {
         // Ensure the array is empty after popping all errors
         let empty_result: ErrorArrayItem = errors.pop();
         assert_eq!(empty_result.err_type, Errors::GeneralError);
-        assert_eq!(empty_result.err_mesg, "No previous error");
+        assert_eq!(empty_result.err_mesg, "No previous error".into());
     }
 
     #[test]

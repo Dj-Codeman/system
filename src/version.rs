@@ -161,7 +161,7 @@ impl Version {
 
     /// Returns the version as a `Stringy`.
     pub fn get_as_string(&self) -> Stringy {
-        Stringy::new(&self.to_string())
+        Stringy::from(&self.to_string())
     }
 
     /// Checks if an incoming version is compatible with the current version.
@@ -219,7 +219,7 @@ impl Version {
                 _ => return None,
             };
             Some(Version {
-                number: Stringy::new(number_part),
+                number: Stringy::from(number_part),
                 code,
             })
         } else {

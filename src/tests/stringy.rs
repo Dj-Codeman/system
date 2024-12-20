@@ -5,7 +5,7 @@ mod tests {
 
     #[test]
     fn test_creation_from_str() {
-        let s = Stringy::new("Hello");
+        let s = Stringy::from("Hello");
         if let Stringy::Immutable(arc_str) = &s {
             assert_eq!(arc_str.as_ref(), "Hello");
         } else {
@@ -15,7 +15,7 @@ mod tests {
 
     #[test]
     fn test_creation_from_string() {
-        let s = Stringy::from_string(String::from("World"));
+        let s = Stringy::from(String::from("World"));
         if let Stringy::Immutable(arc_str) = &s {
             assert_eq!(arc_str.as_ref(), "World");
         } else {
@@ -25,7 +25,7 @@ mod tests {
 
     #[test]
     fn test_mutate_string() {
-        let mut s = Stringy::new("Hello");
+        let mut s = Stringy::from("Hello");
 
         // Mutate the string
         s.mutate(|str_val| {
@@ -41,7 +41,7 @@ mod tests {
 
     #[test]
     fn test_immutable_to_mutable() {
-        let mut s = Stringy::new("Immutable");
+        let mut s = Stringy::from("Immutable");
 
         // Check the initial state
         if let Stringy::Immutable(arc_str) = &s {
@@ -64,7 +64,7 @@ mod tests {
 
     #[test]
     fn test_clone_immutable() {
-        let s = Stringy::new("Clonable");
+        let s = Stringy::from("Clonable");
         let cloned = s.clone_immutable();
 
         assert_eq!(cloned.as_ref(), "Clonable");
@@ -79,7 +79,7 @@ mod tests {
 
     #[test]
     fn test_arc_reference_count() {
-        let s = Stringy::new("Arc Test");
+        let s = Stringy::from("Arc Test");
 
         if let Stringy::Immutable(arc_str) = &s {
             let arc_clone = Arc::clone(arc_str);
@@ -95,7 +95,7 @@ mod tests {
 
     #[test]
     fn test_mutation_does_not_affect_original_arc() {
-        let mut s = Stringy::new("Shared");
+        let mut s = Stringy::from("Shared");
 
         // Clone the immutable string
         let cloned = s.clone_immutable();
@@ -119,7 +119,7 @@ mod tests {
     #[test]
     fn test_as_str_return_correct_type() {
         let original: &str = "Value";
-        let stringy = Stringy::new(original);
+        let stringy = Stringy::from(original);
 
         assert_eq!(stringy.as_str(), original)
     }

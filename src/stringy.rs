@@ -9,14 +9,25 @@ pub enum Stringy {
 }
 
 impl Stringy {
+    #[deprecated(since = "3.0.7", note = "Use Stringy::from() instead")]
     /// Create a new Stringy from a &str
     pub fn new(s: &str) -> Self {
         Self::Immutable(Arc::from(s))
     }
 
+    #[deprecated(since = "3.0.7", note = "Use Stringy::from() instead")]
     /// Create a new Stringy from a String
     pub fn from_string(s: String) -> Self {
         Self::Immutable(s.into())
+    }
+
+    /// Creates a new stringy from anything
+    pub fn from<S>(s: S) -> Self
+    where
+        S: Into<String>,
+    {
+        let data: String = s.into();
+        Self::Immutable(data.into())
     }
 
     /// Convert the Stringy to an Arc<str>
