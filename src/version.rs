@@ -105,6 +105,60 @@ impl Version {
         }
     }
 
+    /// Creates a binary code representation of the version given
+    pub fn encode(&self) -> u16 {
+        let version_numbers = Self::parse_version_parts(&self.number);
+
+        if let Some(numbers) = version_numbers {
+            let major = numbers.0;
+            let minor = numbers.1;
+            let patch = numbers.2;
+
+            // Map VersionCode to its corresponding value.
+            let code_value = match self.code {
+                VersionCode::Production => 0,
+                VersionCode::ReleaseCandidate => 1,
+                VersionCode::Beta => 2,
+                VersionCode::Alpha => 3,
+                VersionCode::Patched => 4,
+            };
+
+            // Pack major, minor, patch, and code into a u16.
+            (code_value & 0b111)               // 3 bits for code
+            | ((major as u16 & 0b11111) << 3)   // 5 bits for major
+            | ((minor as u16 & 0b1111) << 8)    // 4 bits for minor
+            | ((patch as u16 & 0b1111) << 12) // 4 bits for patch
+        } else {
+            // parsing error
+            0
+        }
+    }
+
+    /// Decodes a u16 into a Version
+    pub fn decode(encoded: u16) -> Self {
+        let code_value = encoded & 0b111;
+        let major = (encoded >> 3) & 0b11111;
+        let minor = (encoded >> 8) & 0b1111;
+        let patch = (encoded >> 12) & 0b1111;
+
+        let code = match code_value {
+            0 => VersionCode::Production,
+            1 => VersionCode::ReleaseCandidate,
+            2 => VersionCode::Beta,
+            3 => VersionCode::Alpha,
+            4 => VersionCode::Patched,
+            _ => VersionCode::Patched,
+        };
+
+        // Construct the `number` string in the format "MAJOR.MINOR.PATCH".
+        let number = format!("{}.{}.{}", major, minor, patch);
+
+        Version {
+            number: number.into(),
+            code,
+        }
+    }
+
     /// Returns the version as a `Stringy`.
     pub fn get_as_string(&self) -> Stringy {
         Stringy::new(&self.to_string())
@@ -126,16 +180,16 @@ impl Version {
             (VersionCode::ReleaseCandidate, VersionCode::ReleaseCandidate)
             | (VersionCode::ReleaseCandidate, VersionCode::Beta)
             | (VersionCode::Beta, VersionCode::ReleaseCandidate) => {
-                let (incoming_major, _) = Self::parse_version_parts(&incoming.number).unwrap();
-                let (current_major, _) = Self::parse_version_parts(&current.number).unwrap();
+                let (incoming_major, _, _) = Self::parse_version_parts(&incoming.number).unwrap();
+                let (current_major, _, _) = Self::parse_version_parts(&current.number).unwrap();
                 incoming_major == current_major
             }
             (VersionCode::Production, VersionCode::ReleaseCandidate)
             | (VersionCode::ReleaseCandidate, VersionCode::Production)
             | (VersionCode::Production, VersionCode::Production) => {
-                let (incoming_major, incoming_minor) =
+                let (incoming_major, incoming_minor, _) =
                     Self::parse_version_parts(&incoming.number).unwrap();
-                let (current_major, current_minor) =
+                let (current_major, current_minor, _) =
                     Self::parse_version_parts(&current.number).unwrap();
                 incoming_major == current_major && incoming_minor == current_minor
             }
@@ -179,13 +233,14 @@ impl Version {
     }
 
     /// Parses a version string into major and minor components.
-    fn parse_version_parts(version: &str) -> Option<(u32, u32)> {
+    fn parse_version_parts(version: &str) -> Option<(u32, u32, u32)> {
         let parts: Vec<&str> = version.split('.').collect();
         if parts.len() != 3 {
             return None;
         }
         let major: u32 = parts[0].parse().ok()?;
         let minor: u32 = parts[1].parse().ok()?;
-        Some((major, minor))
+        let patch: u32 = parts[2].parse().ok()?;
+        Some((major, minor, patch))
     }
 }

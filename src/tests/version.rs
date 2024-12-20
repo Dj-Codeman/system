@@ -69,4 +69,72 @@ mod tests {
 
         assert!(software_version1.compare_versions(&software_version2));
     }
+
+    #[cfg(test)]
+    #[test]
+    fn test_encode_basic() {
+        let version = Version {
+            number: "1.2.3".into(),
+            code: VersionCode::Beta,
+        };
+        let encoded = version.encode();
+        assert_eq!(encoded, 0b0011_0010_00001_010); // 3 for Beta, 1 for major, 2 for minor, 3 for patch
+    }
+
+    #[test]
+    fn test_encode_edge_cases() {
+        // Maximum possible values within the limits
+        let version = Version {
+            number: "31.15.15".into(),
+            code: VersionCode::Alpha,
+        };
+        let encoded = version.encode();
+        assert_eq!(encoded, 0b1111_1111_11111_011); // 3 bits for Alpha, max values for major, minor, patch
+    }
+
+    #[test]
+    fn test_encode_invalid_version_string() {
+        let version = Version {
+            number: "not.a.version".into(),
+            code: VersionCode::Production,
+        };
+        let encoded = version.encode();
+        assert_eq!(encoded, 0); // Invalid string should result in 0
+    }
+
+    #[test]
+    fn test_decode_basic() {
+        let encoded = 0b0011_0010_00001_010; // Beta, 1 for major, 2 for minor, 3 for patch
+        let decoded = Version::decode(encoded);
+        assert_eq!(decoded.number.as_str(), "1.2.3");
+        assert_eq!(decoded.code, VersionCode::Beta);
+    }
+
+    #[test]
+    fn test_decode_edge_cases() {
+        let encoded = 0b1111_1111_11111_011; // Alpha, max values for major, minor, patch
+        let decoded = Version::decode(encoded);
+        assert_eq!(decoded.number.as_str(), "31.15.15");
+        assert_eq!(decoded.code, VersionCode::Alpha);
+    }
+
+    #[test]
+    fn test_round_trip_encode_decode() {
+        let version = Version {
+            number: "5.10.7".into(),
+            code: VersionCode::ReleaseCandidate,
+        };
+        let encoded = version.encode();
+        let decoded = Version::decode(encoded);
+        assert_eq!(decoded.number, version.number);
+        assert_eq!(decoded.code, version.code);
+    }
+
+    #[test]
+    fn test_decode_invalid_encoded_value() {
+        let encoded = 0b0000_0000_00000_111; // Invalid code (not mapped to any VersionCode)
+        let decoded = Version::decode(encoded);
+        assert_eq!(decoded.code, VersionCode::Patched); // Default fallback
+        assert_eq!(decoded.number.as_str(), "0.0.0"); // Default values for major, minor, patch
+    }
 }
