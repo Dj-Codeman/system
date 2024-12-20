@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
+    use std::io::Write;
     use std::{
         fs::{self, File},
         os::unix::fs::{MetadataExt, PermissionsExt},
         path::PathBuf,
     };
-    use std::io::Write;
 
     use nix::unistd::{Gid, Uid};
 
@@ -13,7 +13,7 @@ mod tests {
         errors::{UnifiedResult as uf, WarningArray},
         functions::{
             create_hash, del_dir, del_file, generate_random_string, is_string_in_file, make_dir,
-            make_file, path_present, set_file_ownership, set_file_permission, truncate, tar, untar
+            make_file, path_present, set_file_ownership, set_file_permission, tar, truncate, untar,
         },
         types::PathType,
     };

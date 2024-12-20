@@ -154,10 +154,11 @@ where
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
 pub fn make_dir_perm<S>(folder_name: S, permissions: u32) -> uf<()>
 where
-    S: Into<String> + Clone
+    S: Into<String> + Clone,
 {
     let permissions = fs::Permissions::from_mode(permissions);
-    let file_creation_result = fs::create_dir(folder_name.clone().into()).map_err(|err| ErrorArrayItem::from(err));
+    let file_creation_result =
+        fs::create_dir(folder_name.clone().into()).map_err(|err| ErrorArrayItem::from(err));
 
     match file_creation_result {
         Ok(_) => {
