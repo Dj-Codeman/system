@@ -1,7 +1,8 @@
 use crate::errors::{ErrorArrayItem, WarningArrayItem, Warnings};
+use crate::stringy::Stringy;
 use crate::{errors, types};
 use std::fs::OpenOptions;
-use std::io::{self, BufRead, BufReader, Read};
+use std::io::{self, BufRead, BufReader, BufWriter, Read};
 use std::os::unix::fs::{chown, MetadataExt};
 use std::path::PathBuf;
 use std::{
@@ -12,9 +13,11 @@ use std::{
 
 use errors::{OkWarning, UnifiedResult as uf};
 use flate2::bufread::GzDecoder;
+use flate2::write::GzEncoder;
+use flate2::Compression;
 use nix::unistd::{Gid, Uid};
 use sha2::{Digest, Sha256};
-use tar::Archive;
+use tar::{Archive, Builder};
 use types::{ClonePath, PathType};
 use walkdir::WalkDir;
 
@@ -62,7 +65,11 @@ pub fn generate_random_string(length: usize) -> uf<String> {
 ///
 /// Returns `Ok(true)` if the target string is found, otherwise `Ok(false)`.
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
-pub fn is_string_in_file(file_path: &PathType, target_string: &str) -> uf<bool> {
+pub fn is_string_in_file<S>(file_path: &PathType, target_string: S) -> uf<bool>
+where
+    S: Into<String>,
+    for<'a> &'a str: PartialEq<S>,
+{
     let file = if let Ok(data) = open_file(file_path.clone_path(), false) {
         data
     } else {
@@ -97,12 +104,16 @@ pub fn is_string_in_file(file_path: &PathType, target_string: &str) -> uf<bool> 
 /// # Returns
 ///
 /// Returns the generated hash as a hexadecimal string.
-pub fn create_hash(data: String) -> String {
+pub fn create_hash<S>(data: S) -> Stringy
+where
+    S: Into<String> + std::convert::AsRef<[u8]>,
+    for<'a> &'a str: PartialEq<S>,
+{
     let mut hasher = Sha256::new();
     hasher.update(data);
     let result = hasher.finalize();
     let hash: String = hex::encode(result);
-    return hash;
+    return Stringy::from(hash);
     // 256 because its responsible for generating the writing keys
 }
 
@@ -116,10 +127,17 @@ pub fn create_hash(data: String) -> String {
 /// # Returns
 ///
 /// Returns the truncated string.
-pub fn truncate(s: &str, max_chars: usize) -> &str {
-    match s.char_indices().nth(max_chars) {
-        None => s,
-        Some((idx, _)) => &s[..idx],
+pub fn truncate<S>(string: S, max_chars: usize) -> Stringy
+where
+    S: Into<String>,
+{
+    let data: String = string.into();
+    match data.char_indices().nth(max_chars) {
+        None => Stringy::from(data),
+        Some((idx, _)) => {
+            let result = &data[..idx];
+            Stringy::from(result)
+        }
     }
 }
 
@@ -134,13 +152,16 @@ pub fn truncate(s: &str, max_chars: usize) -> &str {
 ///
 /// Returns `Ok(())` if the folder creation and permission setting are successful.
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
-pub fn make_dir_perm(folder_name: &str, permissions: u32) -> uf<()> {
+pub fn make_dir_perm<S>(folder_name: S, permissions: u32) -> uf<()>
+where
+    S: Into<String> + Clone
+{
     let permissions = fs::Permissions::from_mode(permissions);
-    let file_creation_result = fs::create_dir(folder_name).map_err(|err| ErrorArrayItem::from(err));
+    let file_creation_result = fs::create_dir(folder_name.clone().into()).map_err(|err| ErrorArrayItem::from(err));
 
     match file_creation_result {
         Ok(_) => {
-            let set_permission = fs::set_permissions(folder_name, permissions)
+            let set_permission = fs::set_permissions(folder_name.into(), permissions)
                 .map_err(|err| ErrorArrayItem::from(err));
             match set_permission {
                 Ok(_) => return uf::new(Ok(())),
