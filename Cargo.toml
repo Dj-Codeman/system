@@ -1,6 +1,6 @@
 [package]
 name = "dusa_collection_utils"
-version = "3.0.8"
+version = "3.1.0"
 edition = "2021"
 authors = ["Darrion Whitfield <dwhitfield@ramfield.net>"]
 description = "A common library with standardized functions that the ais_platform, dusa, recs and others will depend on"
@@ -28,3 +28,4 @@ cfg_rust_features = "0.1.2"
 nix = "0.20.0"
 lazy_static = "1.5.0"
 colored = "2.1.0"
+tempfile = "3.14.0"
