@@ -5,6 +5,7 @@ mod tests {
         os::unix::fs::{MetadataExt, PermissionsExt},
         path::PathBuf,
     };
+    use std::io::Write;
 
     use nix::unistd::{Gid, Uid};
 
@@ -12,7 +13,7 @@ mod tests {
         errors::{UnifiedResult as uf, WarningArray},
         functions::{
             create_hash, del_dir, del_file, generate_random_string, is_string_in_file, make_dir,
-            make_file, path_present, set_file_ownership, set_file_permission, truncate,
+            make_file, path_present, set_file_ownership, set_file_permission, truncate, tar, untar
         },
         types::PathType,
     };
@@ -53,7 +54,7 @@ mod tests {
     #[test]
     fn trimming() {
         let result = truncate("Hello, World", 5);
-        assert_eq!(result, "Hello");
+        assert_eq!(result, "Hello".into());
     }
 
     #[test]
@@ -64,10 +65,10 @@ mod tests {
 
     #[test]
     fn hash() {
-        let result = create_hash("hash".to_string());
+        let result = create_hash("hash");
         assert_eq!(
             result,
-            "d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa".to_string()
+            "d04b98f48e8f8bcc15c6ae5ac050801cd6dcfd428fb5f9e65c4e16e7807340fa".into()
         );
     }
 
@@ -166,5 +167,98 @@ mod tests {
         }
 
         fs::remove_file(&path).expect("Failed to remove test file");
+    }
+
+    // Testing for tar and untar
+    /// Helper function to create a test file with given content.
+    fn create_tar_test_file(path: &PathType, file_name: &str, content: &str) {
+        let file_path = path.clone().join(file_name);
+        let mut file: File = fs::File::create(&file_path).unwrap();
+        writeln!(file, "{}", content).unwrap();
+    }
+
+    /// Helper function to check if a file exists in a directory.
+    fn file_exists_in_dir(dir: &PathType, file_name: &str) -> bool {
+        dir.clone().join(file_name).exists()
+    }
+
+    #[test]
+    fn test_create_tar() {
+        // Create a temporary directory with test files
+        let input_path = PathType::temp_dir().unwrap();
+
+        create_tar_test_file(&input_path, "test1.txt", "This is test file 1.");
+        create_tar_test_file(&input_path, "test2.txt", "This is test file 2.");
+
+        // Create a temporary output file for the tarball
+        let tar_file = input_path.to_path().join("test_archive.tar.gz");
+        let tar_path = PathType::PathBuf(tar_file.clone());
+
+        assert!(input_path.exists());
+
+        // Call the create_tar function
+        assert!(tar(&input_path, &tar_path).is_ok());
+
+        // Check if the tar file is created
+        assert!(tar_file.exists());
+    }
+
+    #[test]
+    fn test_untar() {
+        // Create a temporary directory for input files and output extraction
+        let input_path = PathType::temp_dir().unwrap();
+        let output_path = PathType::temp_dir().unwrap();
+
+        // Create test files and tar them
+        create_tar_test_file(&input_path, "test1.txt", "This is test file 1.");
+        create_tar_test_file(&input_path, "test2.txt", "This is test file 2.");
+
+        let tar_file = input_path.to_path().join("test_archive.tar.gz");
+        let tar_path = PathType::PathBuf(tar_file.clone());
+
+        tar(&input_path, &tar_path).unwrap();
+
+        // Ensure tar file is created
+        assert!(tar_file.exists());
+
+        // Extract the tar file
+        assert!(untar(&tar_path, &output_path).is_ok());
+
+        // Verify the extracted files
+        assert!(file_exists_in_dir(&output_path, "test1.txt"));
+        assert!(file_exists_in_dir(&output_path, "test2.txt"));
+    }
+
+    #[test]
+    fn test_create_tar_empty_folder() {
+        // Create a temporary empty directory
+        let input_path = PathType::temp_dir().unwrap();
+
+        // Create a tar file path
+        let tar_file = input_path.to_path().join("empty_archive.tar.gz");
+        let tar_path = PathType::PathBuf(tar_file.clone());
+
+        // Call create_tar on the empty folder
+        assert!(tar(&input_path, &tar_path).is_ok());
+
+        // Check if the tar file is created
+        assert!(tar_file.exists());
+    }
+
+    #[test]
+    fn test_untar_invalid_tar_file() {
+        // Create a temporary directory
+        let input_path = PathType::temp_dir().unwrap();
+
+        // Create an invalid tar file
+        let invalid_tar_file = input_path.to_path().join("invalid.tar.gz");
+        let mut file = fs::File::create(&invalid_tar_file).unwrap();
+        file.write_all(b"This is not a valid tar file").unwrap();
+
+        let invalid_tar_path = PathType::PathBuf(invalid_tar_file.clone());
+        let output_path = PathType::temp_dir().unwrap();
+
+        // Try extracting the invalid tar file
+        assert!(untar(&invalid_tar_path, &output_path).is_err());
     }
 }
