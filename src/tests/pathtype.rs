@@ -93,4 +93,10 @@ mod tests {
 
         assert_eq!(path_type, PathType::Path(boxed_path));
     }
+
+    #[test]
+    fn test_creating_temp_folder() {
+        let path = PathType::temp_dir().unwrap();
+        assert!(path.exists())
+    }
 }
