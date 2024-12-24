@@ -157,11 +157,11 @@ mod tests {
         let path = PathBuf::from("/tmp/test_set_file_permission");
         create_test_file(&path).expect("Failed to create test file");
 
-        match set_file_permission(PathType::from(path.clone())).uf_unwrap() {
+        match set_file_permission(PathType::from(path.clone()), 0o400).uf_unwrap() {
             Ok(_) => {
                 let metadata = fs::metadata(&path).expect("Failed to get metadata");
                 let permissions = metadata.permissions();
-                assert_eq!(permissions.mode() & 0o777, 0o660);
+                assert_eq!(permissions.mode() & 0o777, 0o400);
             }
             Err(e) => panic!("Failed to set file permission: {:?}", e),
         }

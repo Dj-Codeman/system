@@ -546,22 +546,22 @@ pub fn set_file_ownership(path: &PathBuf, uid: Uid, gid: Gid) -> uf<()> {
 ///
 /// let socket_path = PathType::from("/path/to/socket");
 ///
-/// match set_file_permission(socket_path).uf_unwrap() {
+/// match set_file_permission(socket_path, 0o777).uf_unwrap() {
 ///     Ok(_) => println!("Permissions set successfully"),
 ///     Err(e) => eprintln!("Failed to set permissions: {:?}", e),
 /// }
 /// ```
-pub fn set_file_permission(socket_path: PathType) -> uf<()> {
+pub fn set_file_permission(socket_path: PathType, permissions: u32) -> uf<()> {
     // Changing the permissions of the socket
     let socket_metadata = match fs::metadata(socket_path.clone()) {
         Ok(d) => d,
         Err(e) => return uf::new(Err(ErrorArrayItem::from(e))),
     };
 
-    let mut permissions = socket_metadata.permissions();
-    permissions.set_mode(0o660); // Set desired permissions
+    let mut current_permissions = socket_metadata.permissions();
+    current_permissions.set_mode(permissions); // Set desired permissions
 
-    if let Err(err) = fs::set_permissions(socket_path.clone(), permissions) {
+    if let Err(err) = fs::set_permissions(socket_path.clone(), current_permissions) {
         return uf::new(Err(ErrorArrayItem::from(err)));
     }
 
