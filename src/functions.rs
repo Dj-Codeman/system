@@ -568,6 +568,16 @@ pub fn set_file_permission(socket_path: PathType, permissions: u32) -> uf<()> {
     uf::new(Ok(()))
 }
 
+/// Retrieves the current Unix timestamp in seconds.
+pub fn current_timestamp() -> u64 {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let start = SystemTime::now();
+    let since_the_epoch = start
+        .duration_since(UNIX_EPOCH)
+        .expect("Time went backwards");
+    since_the_epoch.as_secs()
+}
+
 #[cfg(rust_comp_feature = "try_trait_v2")]
 mod tests {
     #[test]
