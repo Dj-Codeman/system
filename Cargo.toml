@@ -1,6 +1,6 @@
 [package]
 name = "dusa_collection_utils"
-version = "3.1.1"
+version = "3.1.2"
 edition = "2021"
 authors = ["Darrion Whitfield <dwhitfield@ramfield.net>"]
 description = "A common library with standardized functions that the ais_platform, dusa, recs and others will depend on"
@@ -19,7 +19,6 @@ tokio = { version = "1", features = ["full"] }
 tar = "0.4"
 walkdir = "2.3"
 regex = "1.10.4"
-simple_pretty = "0.1.0"
 rand = "0.8.5"
 reqwest = "0.12.4"
 serde_yaml = "0.9.34"
