@@ -165,14 +165,14 @@ impl Version {
     }
 
     /// Checks if an incoming version is compatible with the current version.
-    pub fn compare_versions(current: &Version, incoming: &Version) -> bool {
-        if current.code == VersionCode::Patched {
+    pub fn compare_versions(&self, incoming: &Version) -> bool {
+        if self.code == VersionCode::Patched {
             return true;
         }
         if incoming.code == VersionCode::Patched {
             return true;
         }
-        match (&incoming.code, &current.code) {
+        match (&incoming.code, &self.code) {
             (VersionCode::Alpha, VersionCode::Alpha) => true,
             (VersionCode::Beta, VersionCode::Beta)
             | (VersionCode::Beta, VersionCode::Alpha)
@@ -181,7 +181,7 @@ impl Version {
             | (VersionCode::ReleaseCandidate, VersionCode::Beta)
             | (VersionCode::Beta, VersionCode::ReleaseCandidate) => {
                 let (incoming_major, _, _) = Self::parse_version_parts(&incoming.number).unwrap();
-                let (current_major, _, _) = Self::parse_version_parts(&current.number).unwrap();
+                let (current_major, _, _) = Self::parse_version_parts(&self.number).unwrap();
                 incoming_major == current_major
             }
             (VersionCode::Production, VersionCode::ReleaseCandidate)
@@ -190,7 +190,7 @@ impl Version {
                 let (incoming_major, incoming_minor, _) =
                     Self::parse_version_parts(&incoming.number).unwrap();
                 let (current_major, current_minor, _) =
-                    Self::parse_version_parts(&current.number).unwrap();
+                    Self::parse_version_parts(&self.number).unwrap();
                 incoming_major == current_major && incoming_minor == current_minor
             }
             _ => false,
