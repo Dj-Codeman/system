@@ -19,3 +19,5 @@ pub mod stringy_test;
 pub mod types_test;
 #[path = "tests/version.rs"]
 pub mod version_test;
+#[path ="tests/rb.rs"]
+pub mod rb_test;
