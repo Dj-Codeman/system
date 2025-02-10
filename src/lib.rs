@@ -11,6 +11,8 @@ pub mod version;
 pub mod errors_test;
 #[path = "tests/functions.rs"]
 pub mod function_test;
+#[path = "tests/rb.rs"]
+pub mod rb_test;
 #[path = "tests/rwarc.rs"]
 pub mod rwarc_test;
 #[path = "tests/stringy.rs"]
@@ -19,5 +21,3 @@ pub mod stringy_test;
 pub mod types_test;
 #[path = "tests/version.rs"]
 pub mod version_test;
-#[path ="tests/rb.rs"]
-pub mod rb_test;
