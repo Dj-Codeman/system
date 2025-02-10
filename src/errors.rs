@@ -14,13 +14,10 @@ use std::{
     thread, time,
 };
 
-#[cfg(rust_comp_feature = "try_trait_v2")]
-use std::{convert::Infallible, ops::FromResidual};
-
 // Imported for conversion to new items
 #[allow(deprecated)]
 use crate::errors_dep::SystemError;
-use crate::{log, log::LogLevel, stringy::Stringy};
+use crate::{log, logger::LogLevel, types::stringy::Stringy};
 // #[allow(deprecated)]
 // use logging::errors::LoggerError;
 // #[allow(deprecated)]
@@ -518,23 +515,6 @@ impl<T> UnifiedResult<T> {
         match self.uf_unwrap() {
             Ok(_) => None,
             Err(e) => Some(e),
-        }
-    }
-}
-
-#[cfg(rust_comp_feature = "try_trait_v2")]
-// Implement FromResidual<Result<Infallible, UnifiedResult<_>>> for UnifiedResult
-impl<T> FromResidual<Result<Infallible, UnifiedResult<T>>> for UnifiedResult<T> {
-    fn from_residual(residual: Result<Infallible, UnifiedResult<T>>) -> Self {
-        match residual.unwrap_err() {
-            UnifiedResult::ResultWarning(_) => {
-                // Since Infallible can never be constructed, this code path is unreachable
-                unreachable!()
-            }
-            UnifiedResult::ResultNoWarns(_) => {
-                // Since Infallible can never be constructed, this code path is unreachable
-                unreachable!()
-            }
         }
     }
 }

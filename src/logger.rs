@@ -20,9 +20,10 @@ pub enum LogLevel {
 macro_rules! log {
     ($level:expr, $($arg:tt)*) => {
         {
-            let current_level = $crate::log::get_log_level();
+            let current_level = $crate::logger::get_log_level();
+            let current_timestamp = $crate::functions::current_timestamp();
             if $level <= current_level {
-                println!("[{}]: {}", $level, format!($($arg)*));
+                println!("[{} @ {}]: {}", $level, current_timestamp, format!($($arg)*));
             }
         }
     };

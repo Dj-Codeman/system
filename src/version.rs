@@ -2,7 +2,7 @@ use colored::Colorize;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-use crate::stringy::Stringy;
+use crate::types::stringy::Stringy;
 
 /// Struct representing the version information of both application and library.
 #[derive(Debug, Hash, Eq, PartialEq, Ord, PartialOrd, Serialize, Deserialize, Clone)]

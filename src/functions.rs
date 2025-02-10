@@ -1,6 +1,7 @@
+use crate::errors;
 use crate::errors::{ErrorArrayItem, WarningArrayItem, Warnings};
-use crate::stringy::Stringy;
-use crate::{errors, types};
+use crate::types::pathtype::PathType;
+use crate::types::stringy::Stringy;
 use std::fs::OpenOptions;
 use std::io::{self, BufRead, BufReader, BufWriter, Read};
 use std::os::unix::fs::{chown, MetadataExt};
@@ -18,7 +19,6 @@ use flate2::Compression;
 use nix::unistd::{Gid, Uid};
 use sha2::{Digest, Sha256};
 use tar::{Archive, Builder};
-use types::{ClonePath, PathType};
 use walkdir::WalkDir;
 
 /// Generates a random string of the specified length using alphanumeric characters.
@@ -70,7 +70,7 @@ where
     S: Into<String>,
     for<'a> &'a str: PartialEq<S>,
 {
-    let file = if let Ok(data) = open_file(file_path.clone_path(), false) {
+    let file = if let Ok(data) = open_file(file_path.clone(), false) {
         data
     } else {
         return uf::new(Ok(false));
@@ -197,7 +197,7 @@ where
 /// ```rust
 /// use std::io;
 /// use dusa_collection_utils::functions::chown_recursive;
-/// use dusa_collection_utils::types::PathType;
+/// use dusa_collection_utils::types::pathtype::PathType;
 ///
 /// fn main() -> Result<(), io::Error> {
 ///     let path = PathType::Content(String::from("/tmp/file"));
@@ -402,7 +402,7 @@ pub fn del_file(file: &PathType) -> uf<()> {
 /// Returns an error of type `ErrorArrayItem` if there is any issue encountered during the process.
 #[allow(deprecated)]
 pub fn untar(file_path: &PathType, output_folder: &PathType) -> uf<()> {
-    let tar_file: File = match open_file(file_path.clone_path(), false) {
+    let tar_file: File = match open_file(file_path.clone(), false) {
         Ok(d) => d,
         Err(e) => {
             return uf::new(Err(e));
@@ -437,7 +437,7 @@ pub fn tar(input_folder: &PathType, output_file_path: &PathType) -> uf<()> {
         .write(true)
         .create(true) // Create the file if it doesn't exist
         .truncate(true) // Truncate the file if it exists
-        .open(output_file_path.clone_path())
+        .open(output_file_path.clone())
     {
         Ok(file) => file,
         Err(e) => {
@@ -449,7 +449,7 @@ pub fn tar(input_folder: &PathType, output_file_path: &PathType) -> uf<()> {
     let encoder: GzEncoder<BufWriter<File>> = GzEncoder::new(output_writer, Compression::default());
     let mut tar_builder: Builder<GzEncoder<BufWriter<File>>> = Builder::new(encoder);
 
-    match tar_builder.append_dir_all(".", input_folder.clone_path()) {
+    match tar_builder.append_dir_all(".", input_folder.clone()) {
         Ok(_) => uf::new(Ok(())),
         Err(e) => {
             return uf::new(Err(ErrorArrayItem::from(e)));
@@ -542,7 +542,7 @@ pub fn set_file_ownership(path: &PathBuf, uid: Uid, gid: Gid) -> uf<()> {
 /// ```rust
 /// use std::path::PathBuf;
 /// use dusa_collection_utils::functions::set_file_permission;
-/// use dusa_collection_utils::types::PathType;
+/// use dusa_collection_utils::types::pathtype::PathType;
 ///
 /// let socket_path = PathType::from("/path/to/socket");
 ///
@@ -576,12 +576,4 @@ pub fn current_timestamp() -> u64 {
         .duration_since(UNIX_EPOCH)
         .expect("Time went backwards");
     since_the_epoch.as_secs()
-}
-
-#[cfg(rust_comp_feature = "try_trait_v2")]
-mod tests {
-    #[test]
-    fn try_trait() {
-        assert_eq!(true, true)
-    }
 }

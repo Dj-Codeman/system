@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod tests {
-    use crate::types::{ClonePath, CopyPath, PathType};
-
     use std::{
         ops::Deref,
         path::{Path, PathBuf},
     };
+
+    use crate::types::pathtype::{CopyPath, PathType};
 
     #[test]
     fn test_pathbuf_variant() {
@@ -48,7 +48,7 @@ mod tests {
         let path_buf = PathBuf::from("/clone/path");
         let path_type = PathType::PathBuf(path_buf.clone());
 
-        let cloned_path_type = path_type.clone_path();
+        let cloned_path_type = path_type.clone();
         assert_eq!(cloned_path_type, PathType::PathBuf(path_buf));
     }
 

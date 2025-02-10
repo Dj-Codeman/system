@@ -4,15 +4,15 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use serde::{Deserialize, Serialize};
-use tempfile::{tempdir /*tempfile*/};
-
 use crate::{
     errors::{ErrorArrayItem, Errors},
     log,
-    log::LogLevel,
-    stringy::Stringy,
+    logger::LogLevel,
 };
+use serde::{Deserialize, Serialize};
+use tempfile::{tempdir /*tempfile*/};
+
+use super::stringy::Stringy;
 
 /// Represents different types of paths.
 ///

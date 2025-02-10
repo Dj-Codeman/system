@@ -9,13 +9,13 @@ mod tests {
 
     use nix::unistd::{Gid, Uid};
 
+    use crate::types::pathtype::PathType;
     use crate::{
         errors::{UnifiedResult as uf, WarningArray},
         functions::{
             create_hash, del_dir, del_file, generate_random_string, is_string_in_file, make_dir,
             make_file, path_present, set_file_ownership, set_file_permission, tar, truncate, untar,
         },
-        types::PathType,
     };
 
     const TARGET_STRING: &str = "Line 2";

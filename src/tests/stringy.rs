@@ -1,7 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use crate::stringy::Stringy;
     use std::sync::Arc;
+
+    use crate::types::stringy::Stringy;
 
     #[test]
     fn test_creation_from_str() {
