@@ -1,5 +1,7 @@
 use std::collections::VecDeque;
 
+use crate::functions::current_timestamp;
+
 /// A rolling buffer that stores up to a fixed number of recent lines.
 ///
 /// # Examples
@@ -22,7 +24,7 @@ use std::collections::VecDeque;
 /// ```
 pub struct RollingBuffer {
     /// A double-ended queue that holds the lines.
-    lines: VecDeque<String>,
+    lines: VecDeque<(u64, String)>,
     /// The maximum capacity of the buffer.
     capacity: usize,
 }
@@ -81,7 +83,13 @@ impl RollingBuffer {
             // Drop the oldest line.
             self.lines.pop_front();
         }
-        self.lines.push_back(line);
+        self.lines.push_back((current_timestamp(), line));
+    }
+
+    /// Returns a copy of all lines in the buffer with a timestamp of when the were inserted,
+    /// from oldest to newest.
+    pub fn get_latest_time(&self) -> Vec<(u64, String)> {
+        self.lines.iter().cloned().collect()
     }
 
     /// Returns a copy of all lines in the buffer, from oldest to newest.
@@ -99,7 +107,9 @@ impl RollingBuffer {
     /// assert_eq!(lines, vec!["one", "two", "three"]);
     /// ```
     pub fn get_latest(&self) -> Vec<String> {
-        self.lines.iter().cloned().collect()
+        let mut vec: Vec<String> = Vec::new();
+        self.lines.iter().for_each(|d| vec.push(d.1.clone()));
+        vec
     }
 
     /// Returns true if the buffer is empty.
@@ -179,6 +189,16 @@ impl RollingBuffer {
     /// assert_eq!(buffer.front(), Some(&"first".to_string()));
     /// ```
     pub fn front(&self) -> Option<&String> {
+        if let Some(line) = self.lines.front() {
+            Some(&line.1)
+        } else {
+            None
+        }
+    }
+
+    /// Returns the oldest line in the buffer, if any. with
+    /// the  associated timestamp
+    pub fn front_time(&self) -> Option<&(u64, String)> {
         self.lines.front()
     }
 
@@ -195,7 +215,21 @@ impl RollingBuffer {
     /// assert_eq!(buffer.back(), Some(&"second".to_string()));
     /// ```
     pub fn back(&self) -> Option<&String> {
-        self.lines.back()
+        if let Some(line) = self.lines.back() {
+            Some(&line.1)
+        } else {
+            None
+        }
+    }
+
+    /// Returns the most recent line in the buffer, if any. With
+    /// it's associated time stamp
+    pub fn back_time(&self) -> Option<&String> {
+        if let Some(line) = self.lines.back() {
+            Some(&line.1)
+        } else {
+            None
+        }
     }
 
     /// Attempts to pop the oldest line from the buffer.
@@ -212,7 +246,11 @@ impl RollingBuffer {
     /// assert_eq!(popped, Some("first".to_string()));
     /// ```
     pub fn pop_front(&mut self) -> Option<String> {
-        self.lines.pop_front()
+        if let Some(line) = self.lines.pop_front() {
+            Some(line.1)
+        } else {
+            None
+        }
     }
 
     /// Attempts to pop the newest line from the buffer.
@@ -229,6 +267,10 @@ impl RollingBuffer {
     /// assert_eq!(popped, Some("second".to_string()));
     /// ```
     pub fn pop_back(&mut self) -> Option<String> {
-        self.lines.pop_back()
+        if let Some(line) = self.lines.pop_back() {
+            Some(line.1)
+        } else {
+            None
+        }
     }
 }
