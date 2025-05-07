@@ -17,6 +17,14 @@ mod tests {
     }
 
     #[test]
+    fn test_from_array() {
+        let array: Vec<(u64, String)> = vec![(0, String::new()), (1, String::new())];
+        let test: RollingBuffer = RollingBuffer::from(array, 10);
+        assert_eq!(test.is_empty(), false);
+        assert_eq!(test.capacity(), 12);
+    }
+
+    #[test]
     fn test_overflow() {
         let mut buffer = RollingBuffer::new(2);
         buffer.push("one".to_string());
