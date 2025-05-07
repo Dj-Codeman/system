@@ -56,6 +56,12 @@ pub enum Errors {
     /// Error encountered while reading JSON data.
     JsonReading,
 
+    // Json Web Token errors
+    /// General JWT ERROR
+    JWT,
+    /// Invalid jwt token
+    JWTAUTH,
+
     // Data-related errors
     /// Invalid data type.
     InvalidType,
@@ -89,6 +95,14 @@ pub enum Errors {
     InvalidUtf8Data,
     /// Invalid signature.
     InvalidSignature,
+
+    // Keystore errors
+    /// Error accessing the keystore server
+    KeyStoreUnavaible,
+    /// We were expecting a diffrent key 
+    KeyStoreInvalidKey,
+    /// They left me on read ....
+    KeyStoreTimedout,
 
     // Permission and access errors
     /// Permission denied.
