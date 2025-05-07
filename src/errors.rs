@@ -357,6 +357,16 @@ impl ErrorArray {
         container
     }
 
+    /// Clears the [`ErrorArray`]
+    #[allow(unused_assignments)]
+    pub fn clear(&mut self) {
+        if let Ok(mut internal_array) = self.0.write() {
+            internal_array.clear();
+        } else {
+            log!(LogLevel::Trace, "ERROR CLEANING THE ERROR ARRAY kinda dumb honestly");
+        }; 
+    }
+
     /// Creates an empty `Errors` instance.
     pub fn new_container() -> Self {
         let error_array: Vec<ErrorArrayItem> = Vec::new();
