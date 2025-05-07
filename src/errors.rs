@@ -99,7 +99,7 @@ pub enum Errors {
     // Keystore errors
     /// Error accessing the keystore server
     KeyStoreUnavaible,
-    /// We were expecting a diffrent key 
+    /// We were expecting a diffrent key
     KeyStoreInvalidKey,
     /// They left me on read ....
     KeyStoreTimedout,
@@ -363,8 +363,11 @@ impl ErrorArray {
         if let Ok(mut internal_array) = self.0.write() {
             internal_array.clear();
         } else {
-            log!(LogLevel::Trace, "ERROR CLEANING THE ERROR ARRAY kinda dumb honestly");
-        }; 
+            log!(
+                LogLevel::Trace,
+                "ERROR CLEANING THE ERROR ARRAY kinda dumb honestly"
+            );
+        };
     }
 
     /// Creates an empty `Errors` instance.

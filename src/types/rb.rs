@@ -49,12 +49,12 @@ impl RollingBuffer {
 
     /// Takes an array [`Vec<(u64, String)>`] and returns [`self`].
     /// This function assuems that the u64 is a valid unix timestamp
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `array` - A [`Vec<(u64, String)>`]
     /// * `capacity` - The capacity of the new [`self`].
-    /// 
+    ///
     /// This function doesn't panic. If the total of capacity + pre-existing
     /// is greater than [`usize::max`] the capacity will set at [`usize::max`]
     pub fn from(array: Vec<(u64, String)>, capacity: usize) -> Self {
@@ -63,8 +63,11 @@ impl RollingBuffer {
         array.iter().for_each(|entry| {
             deque.push_back(entry.clone());
         });
-        
-        Self { lines: deque, capacity: capacity.saturating_add(array.len()) }
+
+        Self {
+            lines: deque,
+            capacity: capacity.saturating_add(array.len()),
+        }
     }
 
     /// Returns the capacity of the buffer.
