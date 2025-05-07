@@ -49,14 +49,22 @@ mod tests {
         let error_item2 =
             ErrorArrayItem::new(Errors::CreatingFile, String::from("Failed to create file"));
 
-        error_array.push(error_item1);
-        error_array.push(error_item2);
+        error_array.push(error_item1.clone());
+        error_array.push(error_item2.clone());
 
         assert_eq!(error_array.len(), 2);
 
         // Displaying and clearing the array
         error_array.clone().display(false);
         assert_eq!(error_array.len(), 0);
+
+        error_array.push(error_item1.clone());
+        error_array.push(error_item2.clone());
+        error_array.clear();
+        assert_eq!(error_array.len(), 0);
+
+        error_array = ErrorArray::from(error_item1);
+        assert_eq!(error_array.len(), 1);
     }
 
     #[test]
