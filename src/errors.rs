@@ -336,6 +336,13 @@ impl ErrorArray {
         return error;
     }
 
+    /// Creats an [`ErrorArray`] from a single [`ErrorArrayItem`]
+    pub fn from(ei: ErrorArrayItem) -> Self {
+        let mut container: ErrorArray = Self::new_container();
+        container.push(ei);
+        container
+    }
+
     /// Creates an empty `Errors` instance.
     pub fn new_container() -> Self {
         let error_array: Vec<ErrorArrayItem> = Vec::new();
