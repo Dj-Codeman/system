@@ -1,5 +1,5 @@
+pub mod controls;
 pub mod pathtype;
 pub mod rb;
 pub mod rwarc;
 pub mod stringy;
-pub mod controls;
