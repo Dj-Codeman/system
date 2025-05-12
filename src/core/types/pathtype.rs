@@ -108,6 +108,7 @@ impl PathType {
 
     pub fn temp_dir() -> Result<Self, ErrorArrayItem> {
         if let Ok(dir) = tempdir() {
+            #[allow(deprecated)]
             let path = dir.into_path();
             Ok(PathType::PathBuf(path))
         } else {
