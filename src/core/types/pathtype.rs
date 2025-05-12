@@ -5,7 +5,11 @@ use std::{
 };
 
 use crate::{
-    core::{errors::{ErrorArrayItem, Errors}, logger::LogLevel}, log
+    core::{
+        errors::{ErrorArrayItem, Errors},
+        logger::LogLevel,
+    },
+    log,
 };
 use serde::{Deserialize, Serialize};
 use tempfile::{tempdir /*tempfile*/};

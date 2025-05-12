@@ -1,20 +1,22 @@
-use crate::core::errors::{ErrorArrayItem, WarningArrayItem, Warnings, OkWarning, UnifiedResult as uf};
+use crate::core::errors::{
+    ErrorArrayItem, OkWarning, UnifiedResult as uf, WarningArrayItem, Warnings,
+};
 use crate::core::types::pathtype::PathType;
 use crate::core::types::stringy::Stringy;
+use flate2::Compression;
+use flate2::bufread::GzDecoder;
+use flate2::write::GzEncoder;
+use nix::unistd::{Gid, Uid};
+use sha2::{Digest, Sha256};
 use std::fs::OpenOptions;
 use std::io::{self, BufRead, BufReader, BufWriter, Read};
-use std::os::unix::fs::{chown, MetadataExt};
+use std::os::unix::fs::{MetadataExt, chown};
 use std::path::PathBuf;
 use std::{
-    fs::{self, remove_file, File},
+    fs::{self, File, remove_file},
     os::unix::prelude::PermissionsExt,
     str,
 };
-use flate2::bufread::GzDecoder;
-use flate2::write::GzEncoder;
-use flate2::Compression;
-use nix::unistd::{Gid, Uid};
-use sha2::{Digest, Sha256};
 use tar::{Archive, Builder};
 use walkdir::WalkDir;
 
@@ -300,7 +302,7 @@ pub fn remake_dir(path: &PathType, recursive: bool) -> uf<()> {
             return uf::new(Err(ErrorArrayItem::from(io::Error::new(
                 io::ErrorKind::NotFound,
                 format!("{} not found", path),
-            ))))
+            ))));
         }
     }
 }
@@ -320,7 +322,7 @@ pub fn make_file(path: PathType) -> uf<()> {
             return uf::new(Err(ErrorArrayItem::from(io::Error::new(
                 io::ErrorKind::AlreadyExists,
                 "",
-            ))))
+            ))));
         }
         false => match File::create_new(path) {
             Ok(_) => return uf::new(Ok(())),
@@ -353,7 +355,7 @@ pub fn del_dir(file: &PathType) -> uf<()> {
                     Warnings::Warning,
                     String::from("The file didn't exist"),
                 ),
-            )))
+            )));
         }
     }
 }
@@ -381,7 +383,7 @@ pub fn del_file(file: &PathType) -> uf<()> {
                     Warnings::Warning,
                     String::from("The file didn't exist"),
                 ),
-            )))
+            )));
         }
     }
 }

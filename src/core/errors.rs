@@ -17,7 +17,7 @@ use std::{
 use nix::errno::Errno;
 
 // Imported for conversion to new items
-use crate::{log, core::logger::LogLevel, core::types::stringy::Stringy};
+use crate::{core::logger::LogLevel, core::types::stringy::Stringy, log};
 
 use super::errors_dep::SystemError;
 // #[allow(deprecated)]
