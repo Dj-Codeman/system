@@ -4,7 +4,7 @@ mod tests {
     use std::sync::Arc;
     use tokio::time::Duration;
 
-    use crate::types::rwarc::LockWithTimeout;
+    use crate::core::types::rwarc::LockWithTimeout;
 
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
     struct AppName(String);

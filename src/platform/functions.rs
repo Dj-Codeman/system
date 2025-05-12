@@ -1,7 +1,6 @@
-use crate::errors;
-use crate::errors::{ErrorArrayItem, WarningArrayItem, Warnings};
-use crate::types::pathtype::PathType;
-use crate::types::stringy::Stringy;
+use crate::core::errors::{ErrorArrayItem, WarningArrayItem, Warnings, OkWarning, UnifiedResult as uf};
+use crate::core::types::pathtype::PathType;
+use crate::core::types::stringy::Stringy;
 use std::fs::OpenOptions;
 use std::io::{self, BufRead, BufReader, BufWriter, Read};
 use std::os::unix::fs::{chown, MetadataExt};
@@ -11,8 +10,6 @@ use std::{
     os::unix::prelude::PermissionsExt,
     str,
 };
-
-use errors::{OkWarning, UnifiedResult as uf};
 use flate2::bufread::GzDecoder;
 use flate2::write::GzEncoder;
 use flate2::Compression;
@@ -196,8 +193,8 @@ where
 ///
 /// ```rust
 /// use std::io;
-/// use dusa_collection_utils::functions::chown_recursive;
-/// use dusa_collection_utils::types::pathtype::PathType;
+/// use dusa_collection_utils::platform::functions::chown_recursive;
+/// use dusa_collection_utils::core::types::pathtype::PathType;
 ///
 /// fn main() -> Result<(), io::Error> {
 ///     let path = PathType::Content(String::from("/tmp/file"));
@@ -502,7 +499,7 @@ pub fn open_file(file: PathType, create: bool) -> Result<File, ErrorArrayItem> {
 /// ```rust
 /// use std::path::PathBuf;
 /// use nix::unistd::{Uid, Gid};
-/// use dusa_collection_utils::functions::set_file_ownership;
+/// use dusa_collection_utils::platform::functions::set_file_ownership;
 ///
 /// let path = PathBuf::from("/path/to/file");
 /// let uid = Uid::from_raw(1000); // example user ID
@@ -541,8 +538,8 @@ pub fn set_file_ownership(path: &PathBuf, uid: Uid, gid: Gid) -> uf<()> {
 ///
 /// ```rust
 /// use std::path::PathBuf;
-/// use dusa_collection_utils::functions::set_file_permission;
-/// use dusa_collection_utils::types::pathtype::PathType;
+/// use dusa_collection_utils::platform::functions::set_file_permission;
+/// use dusa_collection_utils::core::types::pathtype::PathType;
 ///
 /// let socket_path = PathType::from("/path/to/socket");
 ///
@@ -566,14 +563,4 @@ pub fn set_file_permission(socket_path: PathType, permissions: u32) -> uf<()> {
     }
 
     uf::new(Ok(()))
-}
-
-/// Retrieves the current Unix timestamp in seconds.
-pub fn current_timestamp() -> u64 {
-    use std::time::{SystemTime, UNIX_EPOCH};
-    let start = SystemTime::now();
-    let since_the_epoch = start
-        .duration_since(UNIX_EPOCH)
-        .expect("Time went backwards");
-    since_the_epoch.as_secs()
 }

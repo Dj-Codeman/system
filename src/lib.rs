@@ -1,11 +1,18 @@
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
-pub mod errors;
-#[deprecated(since = "0.1.0", note = "please use `errors` instead")]
-pub mod errors_dep;
-pub mod functions;
-pub mod logger;
-pub mod types;
-pub mod version;
+pub mod core;
+#[cfg(unix)]
+pub mod platform;
+
+
+// pub mod errors;
+
+
+// #[deprecated(since = "0.1.0", note = "please use `errors` instead")]
+// pub mod errors_dep;
+// pub mod functions;
+// pub mod logger;
+// pub mod types;
+// pub mod version;
 
 #[path = "tests/errors.rs"]
 pub mod errors_test;

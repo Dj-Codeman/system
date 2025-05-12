@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::types::rb::RollingBuffer;
+    use crate::core::types::rb::RollingBuffer;
 
     #[test]
     fn test_capacity() {

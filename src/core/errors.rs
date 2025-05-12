@@ -1,6 +1,5 @@
 use block_modes::BlockModeError;
 use hex::FromHexError;
-use nix::errno::Errno;
 use serde::{Deserialize, Serialize};
 use std::{
     collections,
@@ -14,10 +13,13 @@ use std::{
     thread, time,
 };
 
+#[cfg(unix)]
+use nix::errno::Errno;
+
 // Imported for conversion to new items
-#[allow(deprecated)]
-use crate::errors_dep::SystemError;
-use crate::{log, logger::LogLevel, types::stringy::Stringy};
+use crate::{log, core::logger::LogLevel, core::types::stringy::Stringy};
+
+use super::errors_dep::SystemError;
 // #[allow(deprecated)]
 // use logging::errors::LoggerError;
 // #[allow(deprecated)]
@@ -802,6 +804,7 @@ impl From<&mut FromHexError> for ErrorArrayItem {
 }
 
 // Conversion from nix errors to ErrorArrayItem
+#[cfg(unix)]
 impl From<Errno> for ErrorArrayItem {
     fn from(value: Errno) -> Self {
         ErrorArrayItem::new(Errors::InputOutput, value.to_string())
@@ -809,6 +812,7 @@ impl From<Errno> for ErrorArrayItem {
 }
 
 // Conversion from &mut nix errors to ErrorArrayItem
+#[cfg(unix)]
 impl From<&mut Errno> for ErrorArrayItem {
     fn from(value: &mut Errno) -> Self {
         ErrorArrayItem::new(Errors::InputOutput, value.to_string())
@@ -864,6 +868,7 @@ impl From<TryFromIntError> for ErrorArrayItem {
     }
 }
 
+#[cfg(unix)]
 impl From<nix::Error> for ErrorArrayItem {
     fn from(value: nix::Error) -> Self {
         ErrorArrayItem::new(Errors::GeneralError, value.to_string())

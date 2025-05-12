@@ -3,7 +3,7 @@ use std::time::Duration;
 use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use tokio::time::{self, timeout};
 
-use crate::errors::{ErrorArrayItem, Errors};
+use crate::core::errors::{ErrorArrayItem, Errors};
 
 /// A struct that encapsulates an `Arc<RwLock<T>>` and provides methods
 /// to acquire read and write locks with a timeout.

@@ -2,7 +2,7 @@
 mod tests {
     use std::sync::Arc;
 
-    use crate::types::stringy::Stringy;
+    use crate::core::types::stringy::Stringy;
 
     #[test]
     fn test_creation_from_str() {

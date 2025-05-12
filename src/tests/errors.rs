@@ -1,13 +1,13 @@
 #[cfg(test)]
 mod tests {
-    use crate::errors::ErrorArray;
-    use crate::errors::ErrorArrayItem;
-    use crate::errors::Errors;
-    use crate::errors::OkWarning;
-    use crate::errors::UnifiedResult;
-    use crate::errors::WarningArray;
-    use crate::errors::WarningArrayItem;
-    use crate::errors::Warnings;
+    use crate::core::errors::ErrorArray;
+    use crate::core::errors::ErrorArrayItem;
+    use crate::core::errors::Errors;
+    use crate::core::errors::OkWarning;
+    use crate::core::errors::UnifiedResult;
+    use crate::core::errors::WarningArray;
+    use crate::core::errors::WarningArrayItem;
+    use crate::core::errors::Warnings;
 
     // use super::*;
     use std::io;

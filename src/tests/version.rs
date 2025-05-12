@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::version::{SoftwareVersion, Version, VersionCode};
+    use crate::core::version::{SoftwareVersion, Version, VersionCode};
 
     #[test]
     fn test_version_creation() {

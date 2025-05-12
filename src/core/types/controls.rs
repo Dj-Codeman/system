@@ -22,7 +22,7 @@ impl ToggleControl {
     /// ```rust
     /// # use tokio::runtime::Runtime;
     /// # use std::time::Duration;
-    /// # use dusa_collection_utils::types::controls::ToggleControl;
+    /// # use dusa_collection_utils::core::types::controls::ToggleControl;
     /// # let rt = Runtime::new().unwrap();
     /// # rt.block_on(async {
     ///     let control = ToggleControl::new();
@@ -45,7 +45,7 @@ impl ToggleControl {
     /// ```rust
     /// # use tokio::runtime::Runtime;
     /// # use std::time::Duration;
-    /// # use dusa_collection_utils::types::controls::ToggleControl;
+    /// # use dusa_collection_utils::core::types::controls::ToggleControl;
     /// # let rt = Runtime::new().unwrap();
     /// # rt.block_on(async {
     ///     let control = ToggleControl::new();
@@ -66,7 +66,7 @@ impl ToggleControl {
     /// ```rust
     /// # use tokio::runtime::Runtime;
     /// # use std::time::Duration;
-    /// # use dusa_collection_utils::types::controls::ToggleControl;
+    /// # use dusa_collection_utils::core::types::controls::ToggleControl;
     /// # let rt = Runtime::new().unwrap();
     /// # rt.block_on(async {
     ///     let control = ToggleControl::new();
@@ -92,7 +92,7 @@ impl ToggleControl {
     /// ```rust
     /// # use tokio::runtime::Runtime;
     /// # use std::time::Duration;
-    /// # use dusa_collection_utils::types::controls::ToggleControl;
+    /// # use dusa_collection_utils::core::types::controls::ToggleControl;
     /// # use std::sync::Arc;
     /// # let rt = Runtime::new().unwrap();
     /// # rt.block_on(async {
@@ -133,7 +133,7 @@ impl ToggleControl {
     /// ```rust
     /// # use tokio::runtime::Runtime;
     /// # use std::time::Duration;
-    /// # use dusa_collection_utils::types::controls::ToggleControl;
+    /// # use dusa_collection_utils::core::types::controls::ToggleControl;
     /// # let rt = Runtime::new().unwrap();
     /// # rt.block_on(async {
     /// let control = ToggleControl::new();
@@ -163,7 +163,7 @@ impl ToggleControl {
     /// # Examples
     ///
     /// ```rust
-    /// # use dusa_collection_utils::types::controls::ToggleControl;
+    /// # use dusa_collection_utils::core::types::controls::ToggleControl;
     /// # use tokio::runtime::Runtime;
     /// # let rt = Runtime::new().unwrap();
     /// # rt.block_on(async {

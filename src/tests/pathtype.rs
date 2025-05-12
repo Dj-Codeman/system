@@ -5,7 +5,7 @@ mod tests {
         path::{Path, PathBuf},
     };
 
-    use crate::types::pathtype::{CopyPath, PathType};
+    use crate::core::types::pathtype::{CopyPath, PathType};
 
     #[test]
     fn test_pathbuf_variant() {

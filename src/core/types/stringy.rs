@@ -129,7 +129,7 @@ impl fmt::Display for Stringy {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Stringy::Immutable(arc_str) => write!(f, "{}", arc_str),
-            Stringy::Mutable(ref string) => write!(f, "{}", string),
+            Stringy::Mutable(string) => write!(f, "{}", string),
         }
     }
 }

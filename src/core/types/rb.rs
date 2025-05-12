@@ -1,13 +1,13 @@
 use std::collections::VecDeque;
 
-use crate::functions::current_timestamp;
+use crate::core::functions::current_timestamp;
 
 /// A rolling buffer that stores up to a fixed number of recent lines.
 ///
 /// # Examples
 ///
 /// ```
-/// use dusa_collection_utils::types::rb::RollingBuffer;
+/// use dusa_collection_utils::core::types::rb::RollingBuffer;
 ///
 /// let mut buffer = RollingBuffer::new(3);
 ///
@@ -75,7 +75,7 @@ impl RollingBuffer {
     /// # Examples
     ///
     /// ```
-    /// use dusa_collection_utils::types::rb::RollingBuffer;
+    /// use dusa_collection_utils::core::types::rb::RollingBuffer;
     /// let buffer = RollingBuffer::new(5);
     /// assert_eq!(buffer.capacity(), 5);
     /// ```
@@ -93,7 +93,7 @@ impl RollingBuffer {
     /// # Examples
     ///
     /// ```
-    /// use dusa_collection_utils::types::rb::RollingBuffer;
+    /// use dusa_collection_utils::core::types::rb::RollingBuffer;
     /// let mut buffer = RollingBuffer::new(2);
     /// buffer.push("first".to_string());
     /// buffer.push("second".to_string());
@@ -120,7 +120,7 @@ impl RollingBuffer {
     /// # Examples
     ///
     /// ```
-    /// use dusa_collection_utils::types::rb::RollingBuffer;
+    /// use dusa_collection_utils::core::types::rb::RollingBuffer;
     /// let mut buffer = RollingBuffer::new(3);
     /// buffer.push("one".to_string());
     /// buffer.push("two".to_string());
@@ -140,7 +140,7 @@ impl RollingBuffer {
     /// # Examples
     ///
     /// ```
-    /// use dusa_collection_utils::types::rb::RollingBuffer;
+    /// use dusa_collection_utils::core::types::rb::RollingBuffer;
     /// let mut buffer = RollingBuffer::new(2);
     /// assert!(buffer.is_empty());
     ///
@@ -156,7 +156,7 @@ impl RollingBuffer {
     /// # Examples
     ///
     /// ```
-    /// use dusa_collection_utils::types::rb::RollingBuffer;
+    /// use dusa_collection_utils::core::types::rb::RollingBuffer;
     /// let mut buffer = RollingBuffer::new(2);
     /// assert!(!buffer.is_full());
     ///
@@ -173,7 +173,7 @@ impl RollingBuffer {
     /// # Examples
     ///
     /// ```
-    /// use dusa_collection_utils::types::rb::RollingBuffer;
+    /// use dusa_collection_utils::core::types::rb::RollingBuffer;
     /// let mut buffer = RollingBuffer::new(2);
     /// buffer.push("one".to_string());
     /// assert_eq!(buffer.len(), 1);
@@ -187,7 +187,7 @@ impl RollingBuffer {
     /// # Examples
     ///
     /// ```
-    /// use dusa_collection_utils::types::rb::RollingBuffer;
+    /// use dusa_collection_utils::core::types::rb::RollingBuffer;
     /// let mut buffer = RollingBuffer::new(2);
     /// buffer.push("one".to_string());
     /// buffer.push("two".to_string());
@@ -204,7 +204,7 @@ impl RollingBuffer {
     /// # Examples
     ///
     /// ```
-    /// use dusa_collection_utils::types::rb::RollingBuffer;
+    /// use dusa_collection_utils::core::types::rb::RollingBuffer;
     /// let mut buffer = RollingBuffer::new(3);
     /// buffer.push("first".to_string());
     /// buffer.push("second".to_string());
@@ -230,7 +230,7 @@ impl RollingBuffer {
     /// # Examples
     ///
     /// ```
-    /// use dusa_collection_utils::types::rb::RollingBuffer;
+    /// use dusa_collection_utils::core::types::rb::RollingBuffer;
     /// let mut buffer = RollingBuffer::new(3);
     /// buffer.push("first".to_string());
     /// buffer.push("second".to_string());
@@ -260,7 +260,7 @@ impl RollingBuffer {
     /// # Examples
     ///
     /// ```
-    /// use dusa_collection_utils::types::rb::RollingBuffer;
+    /// use dusa_collection_utils::core::types::rb::RollingBuffer;
     /// let mut buffer = RollingBuffer::new(3);
     /// buffer.push("first".to_string());
     /// buffer.push("second".to_string());
@@ -281,7 +281,7 @@ impl RollingBuffer {
     /// # Examples
     ///
     /// ```
-    /// use dusa_collection_utils::types::rb::RollingBuffer;
+    /// use dusa_collection_utils::core::types::rb::RollingBuffer;
     /// let mut buffer = RollingBuffer::new(3);
     /// buffer.push("first".to_string());
     /// buffer.push("second".to_string());
