@@ -33,7 +33,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        toolchain: [stable]
+        toolchain: [nightly]
         features: ["default", "cli"]
         include:
           - os: windows-latest

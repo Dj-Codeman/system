@@ -9,12 +9,28 @@ mod tests {
     use crate::core::errors::WarningArrayItem;
     use crate::core::errors::Warnings;
 
+    use std::error::Error;
     // use super::*;
     use std::io;
     use std::net;
     use std::net::AddrParseError;
     use std::sync::mpsc;
     // use std::time::SystemTime;
+
+    #[test]
+    fn can_be_trait_object() {
+        let err = ErrorArrayItem::new(Errors::OpeningFile, "couldn’t open foo.txt");
+        // if this compiles, ErrorArrayItem implements std::error::Error:
+        let _obj: &dyn Error = &err;
+    }
+
+    #[test]
+    fn question_mark_raw() -> std::result::Result<(), ErrorArrayItem> {
+        // this will compile, because `From<ErrorArrayItem> for ErrorArrayItem`
+        // is provided by the standard library’s blanket impl
+        Err(ErrorArrayItem::new(Errors::OpeningFile, "boom"))?;
+        Ok(())
+    }
 
     #[test]
     fn test_error_array_item_creation() {
