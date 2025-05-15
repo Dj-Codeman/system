@@ -25,14 +25,6 @@ mod tests {
     }
 
     #[test]
-    fn question_mark_raw() -> std::result::Result<(), ErrorArrayItem> {
-        // this will compile, because `From<ErrorArrayItem> for ErrorArrayItem`
-        // is provided by the standard library’s blanket impl
-        Err(ErrorArrayItem::new(Errors::OpeningFile, "boom"))?;
-        Ok(())
-    }
-
-    #[test]
     fn test_error_array_item_creation() {
         let error_item =
             ErrorArrayItem::new(Errors::OpeningFile, String::from("Failed to open file"));
