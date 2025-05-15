@@ -1,4 +1,4 @@
-use crate::core::errors::{structs::OkWarning, ErrorArray, ErrorArrayItem, WarningArray};
+use crate::core::errors::{ErrorArray, ErrorArrayItem, WarningArray, structs::OkWarning};
 
 pub enum UnifiedResult<T> {
     /// Result variant containing data and warnings.

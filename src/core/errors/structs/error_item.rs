@@ -1,6 +1,6 @@
-use serde::{Serialize, Deserialize};
 use crate::core::errors::Errors;
 use crate::core::types::stringy::Stringy;
+use serde::{Deserialize, Serialize};
 
 /// Represents a generic error.
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, PartialOrd, Ord, Eq)]

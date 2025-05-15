@@ -1,5 +1,5 @@
-use serde::{Serialize, Deserialize};
 use crate::core::errors::Warnings;
+use serde::{Deserialize, Serialize};
 
 /// Represents a generic warning.
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -1,11 +1,22 @@
-use std::{collections, convert::Infallible, io, net, num::{ParseIntError, TryFromIntError}, path, str::Utf8Error, string::FromUtf8Error, sync, thread, time};
+use std::{
+    collections,
+    convert::Infallible,
+    io, net,
+    num::{ParseIntError, TryFromIntError},
+    path,
+    str::Utf8Error,
+    string::FromUtf8Error,
+    sync, thread, time,
+};
 
 use block_modes::BlockModeError;
 use hex::FromHexError;
 use nix::errno::Errno;
 
-use crate::core::{errors::{ErrorArrayItem, Errors}, errors_dep::SystemError};
-
+use crate::core::{
+    errors::{ErrorArrayItem, Errors},
+    errors_dep::SystemError,
+};
 
 // Conversion from &mut std::io::Error to ErrorArrayItem
 impl From<&mut io::Error> for ErrorArrayItem {
@@ -310,7 +321,7 @@ impl From<tokio::sync::TryLockError> for ErrorArrayItem {
 impl From<std::io::Error> for ErrorArrayItem {
     fn from(io_err: std::io::Error) -> Self {
         ErrorArrayItem::new(
-            Errors::InputOutput,                // or whatever variant makes sense
+            Errors::InputOutput, // or whatever variant makes sense
             io_err.to_string(),
         )
     }

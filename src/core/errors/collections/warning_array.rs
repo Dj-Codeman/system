@@ -1,8 +1,8 @@
 use crate::core::errors::structs::warning_item::WarningArrayItem;
-use std::sync::RwLock;
-use std::sync::Arc;
-use crate::log;
 use crate::core::logger::LogLevel;
+use crate::log;
+use std::sync::Arc;
+use std::sync::RwLock;
 
 /// Represents a collection of warnings.
 #[derive(Debug, Clone)]
